@@ -1,2 +1,3 @@
 # multi_cycle_proj
-Project of Computer Achitecture
+
+Multicycle Processor implemented with Mul/Div and FPU Operands
