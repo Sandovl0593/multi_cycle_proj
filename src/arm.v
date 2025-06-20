@@ -6,10 +6,13 @@ module arm (
     output wire [31:0] Adr,         // -> a [ mem ]
     output wire [31:0] WriteData,   // -> wd [ mem ]
 
-    input wire [31:0] ReadData      // [ mem ] rd ->
+    input wire [31:0] ReadData,      // [ mem ] rd ->
+    output wire [31:0] PC,           // para visualizacion
+    output wire [31:0] Instr,         // para visualizacion
+
+    output wire [3:0] state        // para ver los estados
 );
 
-    wire [31:0] Instr;
     wire [3:0] ALUFlags;
     wire PCWrite;
     wire RegWrite;
@@ -41,7 +44,8 @@ module arm (
         .ALUSrcB(ALUSrcB),
         .ResultSrc(ResultSrc),
         .ImmSrc(ImmSrc),
-        .ALUControl(ALUControl)
+        .ALUControl(ALUControl),
+        .state(state)                  // para ver los estados
     );
     
     datapath dp(
@@ -65,6 +69,8 @@ module arm (
         .ALUSrcB(ALUSrcB),
         .ResultSrc(ResultSrc),
         .ImmSrc(ImmSrc),
-        .ALUControl(ALUControl)
+        .ALUControl(ALUControl),
+        
+        .PC(PC)                   // para visualizacion
     );
 endmodule

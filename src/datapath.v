@@ -1,6 +1,6 @@
 module datapath (
-    input wire clk;
-    input wire reset;
+    input wire clk,
+    input wire reset,
 
     output wire [31:0] Adr,        // -> a [ mem ]
     output wire [31:0] WriteData,  // -> wd [ mem ]
@@ -20,10 +20,10 @@ module datapath (
     input wire [1:0] ALUSrcB,
     input wire [1:0] ResultSrc,
     input wire [1:0] ImmSrc,
-    input wire [1:0] ALUControl
+    input wire [1:0] ALUControl,
+    output wire [31:0] PC               // para visualizacion
 );
     wire [31:0] PCNext;
-    wire [31:0] PC;
     wire [31:0] ExtImm;
     wire [31:0] SrcA;
     wire [31:0] SrcB;
@@ -44,6 +44,7 @@ module datapath (
     // (Address Mux), etc. so that your code is easier to understand.
 
     // FETCH ---------------------------------
+    assign PCNext = Result;
 
     // PC' -> [ reg ] -> PC
     flopenr #(32) flopPCnext(
@@ -54,18 +55,16 @@ module datapath (
         .q(PC)
     );
     
-    assign PCNext = Result;
-    
     // AdrSrc -> (0: PC)(1: Result) -> Adr
     mux2 #(32) adrMux(
         .d0(PC),
-        .d1(ALUOut),
+        .d1(Result),
         .s(AdrSrc),
         .y(Adr)
     );
 
     // DECODE ---------------------------------
-    // IRWrite -> [ reg ] -> Instr
+    // ReadData -> [ reg ] -> Instr
     flopenr #(32) flopIR(
         .clk(clk),
         .reset(reset),

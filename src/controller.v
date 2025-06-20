@@ -18,7 +18,8 @@ module controller (
     output wire [1:0] ALUSrcB,
     output wire [1:0] ResultSrc,
     output wire [1:0] ImmSrc,
-    output wire [1:0] ALUControl
+    output wire [1:0] ALUControl,
+    output wire [3:0] state         // para ver los estados
 );
     wire [1:0] FlagW;
     wire PCS;
@@ -49,7 +50,9 @@ module controller (
         .ALUControl(ALUControl),
         // Op Decoder signals
         .ImmSrc(ImmSrc),
-        .RegSrc(RegSrc)
+        .RegSrc(RegSrc),
+
+        .state(state)
     );
     condlogic cl(
         .clk(clk),

@@ -23,7 +23,8 @@ module decode (
     output reg [1:0] ALUControl,    // -> [ datapath ]
     // Op Decoder signals
     output wire [1:0] ImmSrc,       // -> [ datapath ]
-    output wire [1:0] RegSrc        // -> [ datapath ]
+    output wire [1:0] RegSrc,       // -> [ datapath ]
+    output wire [3:0] state         // para ver los estados
 );
     wire Branch;
     wire ALUOp;
@@ -43,7 +44,8 @@ module decode (
         .RegW(RegW),
         .MemW(MemW),
         .Branch(Branch),
-        .ALUOp(ALUOp)
+        .ALUOp(ALUOp),
+        .state(state)
     );
 
     // Add code for the ALU Decoder and PC Logic.    
