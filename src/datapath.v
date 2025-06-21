@@ -135,7 +135,7 @@ module datapath (
     );
     
     // ALUSrcA -> (0: A)(1: PC)(2: ALUOut) -> SrcA
-    mux3 #(32) srcAMux(
+    mux3 #(32) srcAMux( // se modificó a mux3
         .d0(A),
         .d1(PC),
         .d2(ALUOut),
