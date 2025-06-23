@@ -14,7 +14,7 @@ module controller (
     output wire IRWrite,
     output wire AdrSrc,
     output wire [1:0] RegSrc,
-    output wire [1:0] ALUSrcA,
+    output wire ALUSrcA,
     output wire [1:0] ALUSrcB,
     output wire [1:0] ResultSrc,
     output wire [1:0] ImmSrc,

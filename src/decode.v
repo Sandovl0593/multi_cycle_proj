@@ -15,7 +15,7 @@ module decode (
     output wire IRWrite,
     output wire AdrSrc,
     output wire [1:0] ResultSrc,
-    output wire [1:0] ALUSrcA,
+    output wire ALUSrcA,
     output wire [1:0] ALUSrcB,
     
     // ALU Decoder signals 

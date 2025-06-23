@@ -16,7 +16,7 @@ module datapath (
     input wire IRWrite,
     input wire AdrSrc,
     input wire [1:0] RegSrc,
-    input wire [1:0] ALUSrcA,
+    input wire ALUSrcA,
     input wire [1:0] ALUSrcB,
     input wire [1:0] ResultSrc,
     input wire [1:0] ImmSrc,
@@ -134,11 +134,10 @@ module datapath (
         .q(WriteData)
     );
     
-    // ALUSrcA -> (0: A)(1: PC)(2: ALUOut) -> SrcA
-    mux3 #(32) srcAMux( // se modificó a mux3
+    // ALUSrcA -> (0: A)(1: PC) -> SrcA
+    mux2 #(32) srcAMux(
         .d0(A),
         .d1(PC),
-        .d2(ALUOut),
         .s(ALUSrcA),
         .y(SrcA)
     );
