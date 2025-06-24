@@ -4,6 +4,7 @@ module decode (
     input wire [1:0] Op,
     input wire [5:0] Funct,
     input wire [3:0] Rd,
+    input wire [3:0] IsMul, // para verificar que sea Multiply (1001)
 
     // FSM signals
     // -----/-> [ condlogic ]
@@ -20,14 +21,17 @@ module decode (
     
     // ALU Decoder signals 
     output reg [1:0] FlagW,         // -> [ condlogic ]
-    output reg [1:0] ALUControl,    // -> [ datapath ]
+    output reg [2:0] ALUControl,    // -> [ datapath ]
     // Op Decoder signals
+    output wire opMul,              // MUL
     output wire [1:0] ImmSrc,       // -> [ datapath ]
     output wire [1:0] RegSrc,       // -> [ datapath ]
     output wire [3:0] state         // para ver los estados
 );
     wire Branch;
     wire ALUOp;
+    //en el multiply el op es 00, los bits Instr[25:24] son 00 e IsMul == 4'b1001:
+    assign opMul = (Op==2'b00)&(Funct[5:4]==2'b00)&(IsMul == 4'b1001);
 
     // Main FSM
     mainfsm fsm(
@@ -46,6 +50,7 @@ module decode (
         .Branch(Branch),
         .ALUOp(ALUOp),
         .state(state)
+        //.opMul(opMul) pronto
     );
 
     // Add code for the ALU Decoder and PC Logic.    
@@ -53,17 +58,21 @@ module decode (
     always @(*)
         if (ALUOp) begin
             case(Funct[4:1])
-                4'b0100: ALUControl = 2'b00; // ADD
-                4'b0010: ALUControl = 2'b01; // SUB
-                4'b0000: ALUControl = 2'b10; // AND
-                4'b1100: ALUControl = 2'b11; // ORR
-                default: ALUControl = 2'bxx;
+                4'b0100: ALUControl = 3'b000; // ADD
+                4'b0010: ALUControl = 3'b001; // SUB
+                4'b0000:
+                if (opMul)
+                    ALUControl = 3'b100; // MUL
+                else 
+                    ALUControl = 3'b010; // AND
+                4'b1100: ALUControl = 3'b011; // ORR
+                default: ALUControl = 3'bxxx;
             endcase
             
             FlagW[1] = Funct[0]; 
-            FlagW[0] = Funct[0] & (ALUControl == 2'b00 | ALUControl == 2'b01);
+            FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001 | ALUControl == 3'b100);
         end else begin
-            ALUControl = 2'b00; 
+            ALUControl = 3'b000; 
             FlagW = 2'b00; 
         end
 

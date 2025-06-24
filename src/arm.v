@@ -10,7 +10,8 @@ module arm (
     output wire [31:0] PC,           // para visualizacion
     output wire [31:0] Instr,         // para visualizacion
 
-    output wire [3:0] state        // para ver los estados
+    output wire [3:0] state,        // para ver los estados
+    output wire opMul               //para Multiply
 );
 
     wire [3:0] ALUFlags;
@@ -22,7 +23,7 @@ module arm (
     wire ALUSrcA;
     wire [1:0] ALUSrcB;
     wire [1:0] ImmSrc;
-    wire [1:0] ALUControl;
+    wire [2:0] ALUControl;
     wire [1:0] ResultSrc;
 
     controller c(

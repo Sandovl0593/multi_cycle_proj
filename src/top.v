@@ -8,7 +8,8 @@ module top (
     output wire [31:0] PC,
     output wire [31:0] Instr,
     output wire [31:0] ReadData,
-    output wire [3:0] state
+    output wire [3:0] state,
+    output wire opMul //para multiply
 );
 
     arm arm(
@@ -20,7 +21,8 @@ module top (
         .ReadData(ReadData),
         .PC(PC),
         .Instr(Instr),
-        .state(state)
+        .state(state),
+        .opMul(opMul) //para multiply
     );
     mem mem(
         .clk(clk),

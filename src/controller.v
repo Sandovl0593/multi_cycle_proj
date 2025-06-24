@@ -2,7 +2,7 @@ module controller (
     input wire clk,
     input wire reset,
     // instruction signals -/-> [ decode ]
-    input wire [31:12] Instr,
+    input wire [31:0] Instr,
     input wire [3:0] ALUFlags,
 
     // instruction signals -/-> [ datapath ]
@@ -18,8 +18,9 @@ module controller (
     output wire [1:0] ALUSrcB,
     output wire [1:0] ResultSrc,
     output wire [1:0] ImmSrc,
-    output wire [1:0] ALUControl,
-    output wire [3:0] state         // para ver los estados
+    output wire [2:0] ALUControl,
+    output wire [3:0] state,         // para ver los estados
+    output wire opMul               //para MUL
 );
     wire [1:0] FlagW;
     wire PCS;
@@ -33,6 +34,7 @@ module controller (
         .Op(Instr[27:26]),
         .Funct(Instr[25:20]),
         .Rd(Instr[15:12]),
+        .IsMul(Instr[7:4]), // esto determina si es Multiply (1001)
         .PCS(PCS),
         
         // FSM signals 
@@ -52,7 +54,8 @@ module controller (
         .ImmSrc(ImmSrc),
         .RegSrc(RegSrc),
 
-        .state(state)
+        .state(state),
+        .opMul(opMul)//para Multiply
     );
     condlogic cl(
         .clk(clk),

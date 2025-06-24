@@ -11,6 +11,7 @@ module datapath (
     output wire [3:0] ALUFlags,
 
     // [ controller ] (instr & control signals) -/->
+    input wire opMul, //esto es para multiply
     input wire PCWrite,
     input wire RegWrite,
     input wire IRWrite,
@@ -20,7 +21,7 @@ module datapath (
     input wire [1:0] ALUSrcB,
     input wire [1:0] ResultSrc,
     input wire [1:0] ImmSrc,
-    input wire [1:0] ALUControl,
+    input wire [2:0] ALUControl,
     output wire [31:0] PC               // para visualizacion
 );
     wire [31:0] PCNext;
@@ -36,6 +37,11 @@ module datapath (
     wire [31:0] ALUOut;
     wire [3:0] RA1;
     wire [3:0] RA2;
+    //utiles para el modulito:
+    wire [3:0] Rn;
+    wire [3:0] Rm;
+    wire [3:0] Ra;
+    wire [3:0] Rd;
 
     // Your datapath hardware goes below. Instantiate each of the 
     // submodules that you need. Remember that you can reuse hardware
@@ -80,10 +86,20 @@ module datapath (
         .d(ReadData),
         .q(Data)
     );
+    
+    //modulito para Multiply
+    MulRegChecker modulito(
+        .Instruccion(Instr[31:0]),
+        .opMul(opMul),
+        .Rn(Rn),
+        .Rm(Rm),
+        .Ra(Ra),
+        .Rd(Rd)
+    );
 
      // RegSrc_1 -> (0: Rn)(1: R15) -> RA1
     mux2 #(4) ra1Mux(
-        .d0(Instr[19:16]),
+        .d0(Rn),
         .d1(4'b1111), // R15
         .s(RegSrc[0]), 
         .y(RA1)
@@ -91,8 +107,8 @@ module datapath (
 
     // RegSrc_2 -> (0: Rm)(1: Rn) -> RA2
     mux2 #(4) ra2Mux(
-        .d0(Instr[3:0]), 
-        .d1(Instr[15:12]), 
+        .d0(Rm),
+        .d1(Rd), 
         .s(RegSrc[1]), 
         .y(RA2)
     );
@@ -103,7 +119,7 @@ module datapath (
         .we3(RegWrite),
         .ra1(RA1),
         .ra2(RA2),
-        .wa3(Instr[15:12]),
+        .wa3(Instr[19:16]), //Instr[15:12]
         .wd3(Result),
         .r15(Result),
         .rd1(RD1),

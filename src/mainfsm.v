@@ -13,7 +13,9 @@ module mainfsm (
     output wire MemW,
     output wire Branch,
     output wire ALUOp,
+    //input wire opMul, // MUL
     output reg [3:0] state        // para ver los estados
+    
 );
     reg [3:0] nextstate;
     reg [11:0] controls;

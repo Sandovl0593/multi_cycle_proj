@@ -1,6 +1,6 @@
 module alu (
     input [31:0] a, b,
-    input [1:0] ALUControl,
+    input [2:0] ALUControl,
     output reg [31:0] Result,
     output wire [3:0] ALUFlags
 );
@@ -12,10 +12,11 @@ module alu (
     assign sum = a + condinvb + ALUControl[0];
 
     always @(*)
-        casex (ALUControl[1:0])
-            2'b0?: Result = sum;
-            2'b10: Result = a & b;
-            2'b11: Result = a | b;
+        casex (ALUControl[2:0])
+            3'b00?: Result = sum;
+            3'b010: Result = a & b;
+            3'b011: Result = a | b;
+            3'b100: Result = a * b;//MUL
         endcase
   
     assign N = Result[31];
