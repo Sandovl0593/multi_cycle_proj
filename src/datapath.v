@@ -90,7 +90,7 @@ module datapath (
     
     //modulito para Multiply
     MulRegChecker modulito(
-        .Instruccion(Instr[31:0]),
+        .Instr(Instr[31:0]),
         .opMul(opMul),
         .Rn(Rn),
         .Rm(Rm),

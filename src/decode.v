@@ -23,15 +23,13 @@ module decode (
     output reg [1:0] FlagW,         // -> [ condlogic ]
     output reg [2:0] ALUControl,    // -> [ datapath ]
     // Op Decoder signals
-    output wire opMul,              // MUL
+    output reg opMul,              // MUL
     output wire [1:0] ImmSrc,       // -> [ datapath ]
     output wire [1:0] RegSrc,       // -> [ datapath ]
     output wire [3:0] state         // para ver los estados
 );
     wire Branch;
     wire ALUOp;
-    //en el multiply el op es 00, los bits Instr[25:24] son 00 e IsMul == 4'b1001:
-    assign opMul = (Op==2'b00)&(Funct[5:4]==2'b00)&(IsMul == 4'b1001);
 
     // Main FSM
     mainfsm fsm(
@@ -57,6 +55,8 @@ module decode (
     // ALU Decoder
     always @(*)
         if (ALUOp) begin
+            // en el multiply el op es 00, los bits Instr[25:24] son 00 e IsMul == 4'b1001:
+            opMul = (IsMul == 4'b1001) & (Funct[5:4] == 2'b00);
             case(Funct[4:1])
                 4'b0100: ALUControl = 3'b000; // ADD
                 4'b0010: ALUControl = 3'b001; // SUB
