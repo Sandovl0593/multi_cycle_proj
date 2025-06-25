@@ -2,6 +2,7 @@ module top (
     input wire clk,
     input wire reset,
     // Outputs de visualización en Testbench
+    output wire [31:0] Result,
     output wire [31:0] WriteData,
     output wire [31:0] Adr,
     output wire MemWrite,
@@ -15,6 +16,7 @@ module top (
     arm arm(
         .clk(clk),
         .reset(reset),
+        .Result(Result),
         .MemWrite(MemWrite),
         .Adr(Adr),
         .WriteData(WriteData),

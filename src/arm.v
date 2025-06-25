@@ -2,6 +2,7 @@ module arm (
     input wire clk,
     input wire reset,
 
+    output wire [31:0] Result,             //para poder visualizar el resultado
     output wire MemWrite,           // -> we [ mem ]
     output wire [31:0] Adr,         // -> a [ mem ]
     output wire [31:0] WriteData,   // -> wd [ mem ]
@@ -30,7 +31,7 @@ module arm (
         .clk(clk),
         .reset(reset),
         // instruction signals inputs -/-> [ decode ]
-        .Instr(Instr[31:12]),
+        .Instr(Instr[31:0]),
         .ALUFlags(ALUFlags),
         
         // instruction signals outputs -/-> [ datapath ]
@@ -46,7 +47,8 @@ module arm (
         .ResultSrc(ResultSrc),
         .ImmSrc(ImmSrc),
         .ALUControl(ALUControl),
-        .state(state)                  // para ver los estados
+        .state(state),                  // para ver los estados
+        .opMul(opMul)
     );
     
     datapath dp(
@@ -61,6 +63,7 @@ module arm (
         .ALUFlags(ALUFlags),
         
         // [ controller ] (instr & control signals inputs) -/->
+        .opMul(opMul),
         .PCWrite(PCWrite),
         .RegWrite(RegWrite),
         .IRWrite(IRWrite),
@@ -72,6 +75,7 @@ module arm (
         .ImmSrc(ImmSrc),
         .ALUControl(ALUControl),
         
-        .PC(PC)                   // para visualizacion
+        .PC(PC),                   // para visualizacion
+        .Result(Result)
     );
 endmodule

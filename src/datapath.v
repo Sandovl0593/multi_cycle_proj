@@ -22,13 +22,14 @@ module datapath (
     input wire [1:0] ResultSrc,
     input wire [1:0] ImmSrc,
     input wire [2:0] ALUControl,
-    output wire [31:0] PC               // para visualizacion
+    output wire [31:0] PC,               // para visualizacion
+    output wire [31:0] Result
+
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
     wire [31:0] SrcA;
     wire [31:0] SrcB;
-    wire [31:0] Result;
     wire [31:0] Data;
     wire [31:0] RD1;
     wire [31:0] RD2;
@@ -119,7 +120,7 @@ module datapath (
         .we3(RegWrite),
         .ra1(RA1),
         .ra2(RA2),
-        .wa3(Instr[19:16]), //Instr[15:12]
+        .wa3(Rd),
         .wd3(Result),
         .r15(Result),
         .rd1(RD1),
