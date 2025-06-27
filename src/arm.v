@@ -12,19 +12,29 @@ module arm (
     output wire [31:0] Instr,         // para visualizacion
 
     output wire [3:0] state,        // para ver los estados
-    output wire opMul               //para Multiply
+    output wire opMul,               //para Multiply
+
+    // nuevos visualizadores
+    output wire [31:0] SrcA,        // para ver SrcA
+    output wire [31:0] SrcB,        // para ver SrcB
+    // utiles para el multiply:
+    output wire [3:0] Rn,           // Para ver Rn
+    output wire [3:0] Rm,           // Para ver Rm (DP) o Rd (Mem Inmediate)
+    output wire [3:0] Rd,                 // Para ver escritura
+    output wire [31:0] ALUResult,     // Para ver el resultado de la ALU
+    
+    output wire [3:0] ALUFlags,
+    output wire RegWrite,
+    output wire [2:0] ALUControl
 );
 
-    wire [3:0] ALUFlags;
     wire PCWrite;
-    wire RegWrite;
     wire IRWrite;
     wire AdrSrc;
     wire [1:0] RegSrc;
     wire ALUSrcA;
     wire [1:0] ALUSrcB;
     wire [1:0] ImmSrc;
-    wire [2:0] ALUControl;
     wire [1:0] ResultSrc;
 
     controller c(
@@ -32,6 +42,7 @@ module arm (
         .reset(reset),
         // instruction signals inputs -/-> [ decode ]
         .Instr(Instr[31:0]),
+        .Rd(Rd),                // entra Rd
         .ALUFlags(ALUFlags),
         
         // instruction signals outputs -/-> [ datapath ]
@@ -76,6 +87,15 @@ module arm (
         .ALUControl(ALUControl),
         
         .PC(PC),                   // para visualizacion
-        .Result(Result)
+        .Result(Result),
+
+        // nuevos visualizadores
+        .SrcA(SrcA),
+        .SrcB(SrcB),
+        // utiles para el multiply:
+        .Rn(Rn),                  // Para ver Rn
+        .Rm(Rm),                  // Para ver Rm (DP) o Rd (Mem Inmediate)
+        .Rd(Rd),                  // Sale Rd para ver escritura
+        .ALUResult(ALUResult)     // Para ver el resultado de la ALU
     );
 endmodule

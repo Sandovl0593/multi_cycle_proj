@@ -3,6 +3,7 @@ module controller (
     input wire reset,
     // instruction signals -/-> [ decode ]
     input wire [31:0] Instr,
+    input wire [3:0] Rd,
     input wire [3:0] ALUFlags,
 
     // instruction signals -/-> [ datapath ]
@@ -33,7 +34,7 @@ module controller (
         .reset(reset),
         .Op(Instr[27:26]),
         .Funct(Instr[25:20]),
-        .Rd(Instr[15:12]),
+        .Rd(Rd),
         .IsMul(Instr[7:4]), // esto determina si es Multiply (1001)
         .PCS(PCS),
         

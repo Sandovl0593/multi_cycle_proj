@@ -23,26 +23,27 @@ module datapath (
     input wire [1:0] ImmSrc,
     input wire [2:0] ALUControl,
     output wire [31:0] PC,               // para visualizacion
-    output wire [31:0] Result
+    output wire [31:0] Result,
 
+    // nuevos visualizadores
+    output wire [31:0] SrcA,
+    output wire [31:0] SrcB,
+    //utiles para el multiply:
+    output wire [3:0] Rn,                  // Para ver Rn
+    output wire [3:0] Rm,                  // Para ver Rm (DP) o Rd (Mem Inmediate)
+    output wire [3:0] Rd,                 // Para ver escritura
+    output wire [31:0] ALUResult
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
-    wire [31:0] SrcA;
-    wire [31:0] SrcB;
     wire [31:0] Data;
     wire [31:0] RD1;
     wire [31:0] RD2;
     wire [31:0] A;
-    wire [31:0] ALUResult;
     wire [31:0] ALUOut;
     wire [3:0] RA1;
     wire [3:0] RA2;
-    //utiles para el modulito:
-    wire [3:0] Rn;
-    wire [3:0] Rm;
     wire [3:0] Ra;
-    wire [3:0] Rd;
 
     // Your datapath hardware goes below. Instantiate each of the 
     // submodules that you need. Remember that you can reuse hardware
@@ -69,8 +70,18 @@ module datapath (
         .s(AdrSrc),
         .y(Adr)
     );
+    
+    //modulito para Multiply
+    MulRegChecker modulito(
+        .Instr(Instr[31:0]),
+        .opMul(opMul),
+        .Rn(Rn),
+        .Rm(Rm),
+        .Ra(Ra),
+        .Rd(Rd)
+    );
 
-    // DECODE ---------------------------------
+    // DECODE ---------------------------------    
     // ReadData -> [ reg ] -> Instr
     flopenr #(32) flopIR(
         .clk(clk),
@@ -86,16 +97,6 @@ module datapath (
         .reset(reset),
         .d(ReadData),
         .q(Data)
-    );
-    
-    //modulito para Multiply
-    MulRegChecker modulito(
-        .Instr(Instr[31:0]),
-        .opMul(opMul),
-        .Rn(Rn),
-        .Rm(Rm),
-        .Ra(Ra),
-        .Rd(Rd)
     );
 
      // RegSrc_1 -> (0: Rn)(1: R15) -> RA1
@@ -188,9 +189,9 @@ module datapath (
 
     // ResultSrc -> (0: ALUOut)(1: Data)(2: ALUResult) -> Result
     mux3 #(32) resmux(
-        .d0(ALUOut), 
-        .d1(Data), 
-        .d2(ALUResult), 
+        .d0(ALUOut),    // ALUOut from ALU (DP)
+        .d1(Data),      // Data from memory (LDR)
+        .d2(ALUResult), // ALUResult from ALU (Branch or STR)
         .s(ResultSrc), 
         .y(Result)
     ); 
