@@ -183,8 +183,8 @@ module datapath (
         .ALUFlags(ALUFlags)
     );
     
-        // WRITEBACK / MEMORY ---------------------------------
-    // ALUResult -> [ reg ] -> ALUOut
+    // WRITEBACK / MEMORY ---------------------------------
+    // ALUResult (1-2) -> [ reg ] -> ALUOut
     floplongr aluoutreg(
         .clk(clk),
         .reset(reset),
@@ -193,17 +193,6 @@ module datapath (
         .mulEn(IsLongMul),
         .q(ALUOut)
     );
-    
-    
-    // WRITEBACK / MEMORY ---------------------------------
-    // ALUResult -> [ reg ] -> ALUOut
-    /*
-    flopr #(32) aluoutreg(
-        .clk(clk),
-        .reset(reset),
-        .d(ALUResult),
-        .q(ALUOut)
-    );*/
 
     // ResultSrc -> (0: ALUOut)(1: Data)(2: ALUResult) -> Result
     mux3 #(32) resmux(

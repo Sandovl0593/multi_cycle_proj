@@ -347,8 +347,8 @@ if __name__ == "__main__":
         print(f"{i:02d} {text} : 0x{instr:08X}")
 
     with open(output_file, "w") as f:
-        for instr in instrs:
-            f.write(f"{instr:08X}\n")
+        for i in range(len(instrs)):
+            f.write(f"{instrs[i]:08X}    // {extract[i]}\n")
 
     print(f"\nSUCCESS: Hex memory written to {output_file}")
 
