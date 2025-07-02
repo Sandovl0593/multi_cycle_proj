@@ -1,9 +1,11 @@
+`timescale 1ns / 1ps
+
 module MulRegChecker(
     input wire [31:0] Instr,
     input wire opMul,
     output reg [3:0] Rn,
     output reg [3:0] Rm,
-    output reg [3:0] Ra,      // para el mul esto es 0000
+    output reg [3:0] Ra,//para el mul esto es 0000   
     output reg [3:0] Rd
 );
     
@@ -11,7 +13,7 @@ module MulRegChecker(
         if (opMul) begin
             Rn = Instr[3:0];
             Rm = Instr[11:8];
-            Ra = Instr[15:12]; // MUL cable suelto
+            Ra = Instr[15:12];//MUL cable suelto
             Rd = Instr[19:16];
         end else begin
             Rn = Instr[19:16];

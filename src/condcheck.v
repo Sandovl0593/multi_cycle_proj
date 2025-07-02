@@ -1,7 +1,7 @@
 module condcheck (
     input wire [3:0] Cond,
     input wire [3:0] Flags,
-    output reg CondEx       // ¿la condición se cumple?
+    output reg CondEx       // �la condici�n se cumple?
 );
 
     // ADD CODE HERE

@@ -21,7 +21,9 @@ module controller (
     output wire [1:0] ImmSrc,
     output wire [2:0] ALUControl,
     output wire [3:0] state,         // para ver los estados
-    output wire opMul               //para MUL
+    output wire opMul, //para MUL
+    output wire IsLongMul//para tipo UMULL y SMULL
+                  
 );
     wire [1:0] FlagW;
     wire PCS;
@@ -56,7 +58,8 @@ module controller (
         .RegSrc(RegSrc),
 
         .state(state),
-        .opMul(opMul)//para Multiply
+        .opMul(opMul),//para Multiply
+        .IsLongMul(IsLongMul) //new output
     );
     condlogic cl(
         .clk(clk),

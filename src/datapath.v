@@ -9,9 +9,10 @@ module datapath (
     // -/-> [ controller ]
     output wire [31:0] Instr,
     output wire [3:0] ALUFlags,
-
+    
     // [ controller ] (instr & control signals) -/->
     input wire opMul, //esto es para multiply
+    input wire IsLongMul,      //esto es para smull y umull
     input wire PCWrite,
     input wire RegWrite,
     input wire IRWrite,
@@ -29,10 +30,12 @@ module datapath (
     output wire [31:0] SrcA,
     output wire [31:0] SrcB,
     //utiles para el multiply:
-    output wire [3:0] Rn,                  // Para ver Rn
-    output wire [3:0] Rm,                  // Para ver Rm (DP) o Rd (Mem Inmediate)
+    output wire [3:0] Rn,                 // Para ver Rn
+    output wire [3:0] Rm,                 // Para ver Rm (DP) o Rd (Mem Inmediate)
     output wire [3:0] Rd,                 // Para ver escritura
-    output wire [31:0] ALUResult
+    output wire [3:0] Ra,                 // Para ver Ra en el caso de SMULL, UMULL
+    output wire [31:0] ALUResult,         // resultado 31:0
+    output wire [31:0] ALUResult2         // visualizar resultado mul 64:32
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
@@ -43,7 +46,6 @@ module datapath (
     wire [31:0] ALUOut;
     wire [3:0] RA1;
     wire [3:0] RA2;
-    wire [3:0] Ra;
 
     // Your datapath hardware goes below. Instantiate each of the 
     // submodules that you need. Remember that you can reuse hardware
@@ -119,9 +121,11 @@ module datapath (
     regfile rf(
         .clk(clk),
         .we3(RegWrite),
+        .we4(IsLongMul), //condicion para el SMULL, UMULL y escribir en el Ra
         .ra1(RA1),
         .ra2(RA2),
         .wa3(Rd),
+        .wa4(Ra),       //registro agregado para el SMULL, UMULL
         .wd3(Result),
         .r15(Result),
         .rd1(RD1),
@@ -175,17 +179,31 @@ module datapath (
         .b(SrcB), 
         .ALUControl(ALUControl), 
         .Result(ALUResult), 
+        .Result2(ALUResult2),
         .ALUFlags(ALUFlags)
     );
     
+        // WRITEBACK / MEMORY ---------------------------------
+    // ALUResult -> [ reg ] -> ALUOut
+    floplongr aluoutreg(
+        .clk(clk),
+        .reset(reset),
+        .d(ALUResult),
+        .d2(ALUResult2),
+        .mulEn(IsLongMul),
+        .q(ALUOut)
+    );
+    
+    
     // WRITEBACK / MEMORY ---------------------------------
     // ALUResult -> [ reg ] -> ALUOut
+    /*
     flopr #(32) aluoutreg(
         .clk(clk),
         .reset(reset),
         .d(ALUResult),
         .q(ALUOut)
-    );
+    );*/
 
     // ResultSrc -> (0: ALUOut)(1: Data)(2: ALUResult) -> Result
     mux3 #(32) resmux(

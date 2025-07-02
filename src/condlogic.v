@@ -11,9 +11,9 @@ module condlogic (
     input wire RegW,
     input wire MemW,
 
-    output wire PCWrite,        // -> ¿update PC?
-    output wire RegWrite,       // -> ¿load en registro?
-    output wire MemWrite        // -> ¿write en memoria?
+    output wire PCWrite,        // -> update PC?
+    output wire RegWrite,       // -> load en registro?
+    output wire MemWrite        // -> write en memoria?
 );
     
     wire [1:0] FlagWrite;

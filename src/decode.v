@@ -5,7 +5,9 @@ module decode (
     input wire [5:0] Funct,
     input wire [3:0] Rd,
     input wire [3:0] IsMul, // para verificar que sea Multiply (1001)
-
+    //main fsm
+   // input wire opMul, // MUL
+    output wire IsLongMul,  //para tipo UMULL y SMULL
     // FSM signals
     // -----/-> [ condlogic ]
     output wire PCS,
@@ -47,8 +49,10 @@ module decode (
         .MemW(MemW),
         .Branch(Branch),
         .ALUOp(ALUOp),
-        .state(state)
-        //.opMul(opMul) pronto
+        .state(state),
+        .opMul(opMul), //new input
+        .IsLongMul(IsLongMul) //new output
+        
     );
 
     // Add code for the ALU Decoder and PC Logic.    
@@ -60,14 +64,22 @@ module decode (
     always @(*)
         if (ALUOp) begin
             case(Funct[4:1])
-                4'b0100: ALUControl = 3'b000; // ADD
+                4'b0100:
+                if (opMul)//es del tipo Multiply:
+                    ALUControl = 3'b101; // UMULL
+                else 
+                    ALUControl = 3'b000; // ADD
                 4'b0010: ALUControl = 3'b001; // SUB
                 4'b0000:
-                if (opMul)
+                if (opMul)//es del tipo Multiply:
                     ALUControl = 3'b100; // MUL
                 else 
                     ALUControl = 3'b010; // AND
+                4'b0110: ALUControl = 3'b110; // SMULL y aqui no le agregamos la condicion de Multiply
+                // porque no repite Funct con otra instruccion
                 4'b1100: ALUControl = 3'b011; // ORR
+                4'b1111: ALUControl = 3'b111; //DIV
+
                 default: ALUControl = 3'bxxx;
             endcase
             

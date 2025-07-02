@@ -11,6 +11,7 @@ module top (
     output wire [31:0] ReadData,
     output wire [3:0] state,
     output wire opMul, //para multiply
+    output wire IsLongMul,         //new para Umul y Smul
 
     // nuevos visualizadores
     output wire [31:0] SrcA,        // para ver SrcA
@@ -19,7 +20,9 @@ module top (
     output wire [3:0] Rn,           // Para ver Rn
     output wire [3:0] Rm,           // Para ver Rm (DP) o Rd (Mem Inmediate)
     output wire [3:0] Rd,           // Para ver escritura
+    output wire [3:0] Ra,           // Para ver Ra en el caso de SMULL, UMULL
     output wire [31:0] ALUResult,    // Para ver el resultado de la ALU
+    output wire [31:0] ALUResult2,    // visualizar resultado mul 64:32
 
     output wire [3:0] ALUFlags,
     output wire RegWrite,
@@ -38,6 +41,7 @@ module top (
         .Instr(Instr),
         .state(state),
         .opMul(opMul), //para multiply
+        .IsLongMul(IsLongMul),         //new smull y umull
 
         // nuevos visualizadores
         .SrcA(SrcA),        // para ver SrcA
@@ -46,8 +50,9 @@ module top (
         .Rn(Rn),           // Para ver Rn
         .Rm(Rm),           // Para ver Rm (DP) o Rd (Mem Inmediate)
         .Rd(Rd),           // Para ver escritura
+        .Ra(Ra),                  // Para ver Ra en el SMULL y UMULL
         .ALUResult(ALUResult),    // Para ver el resultado de la ALU
-
+        .ALUResult2(ALUResult2),   // visualizar resultado mul 64:32
         .ALUFlags(ALUFlags),
         .RegWrite(RegWrite),
         .ALUControl(ALUControl)

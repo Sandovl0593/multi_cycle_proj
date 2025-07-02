@@ -13,13 +13,13 @@ module mainfsm (
     output wire MemW,
     output wire Branch,
     output wire ALUOp,
-    //input wire opMul, // MUL
-    output reg [3:0] state        // para ver los estados
-    
+    input wire opMul, // MUL
+    output reg [3:0] state,        // para ver los estados
+    output wire IsLongMul   //para tipo UMULL y SMULL
 );
     reg [3:0] nextstate;
-    reg [11:0] controls;
-
+    reg [12:0] controls;
+    
     // Nomenclauta de los estados
     localparam [3:0] FETCH = 0;
     localparam [3:0] DECODE = 1;
@@ -31,7 +31,8 @@ module mainfsm (
     localparam [3:0] EXECUTEI = 7;
     localparam [3:0] ALUWB = 8;
     localparam [3:0] BRANCH = 9;
-    localparam [3:0] UNKNOWN = 10;
+    localparam [3:0] ALUWB2 = 10;
+    localparam [3:0] UNKNOWN = 11;
 
     // state register
     always @(posedge clk or posedge reset)
@@ -39,7 +40,7 @@ module mainfsm (
             state <= FETCH;
         else
             state <= nextstate;
-    
+    //
     // next state logic
     always @(*)
         casex (state)
@@ -57,54 +58,59 @@ module mainfsm (
             MEMRD: nextstate = MEMWB;
             MEMWB: nextstate = FETCH;                       // After Load
             BRANCH: nextstate = FETCH;                      // After Branch
-            ALUWB: nextstate = FETCH;                       // After ALU Write Back
+            ALUWB: nextstate = (Funct[4:1]!= 4'b0000 && opMul) ? ALUWB2 : FETCH;    // After ALU Write Back
+            ALUWB2: nextstate = FETCH; // After ALU Write Back
             default: nextstate = FETCH;
         endcase
 
     // output logic
     always @(*)
         case (state)
-        FETCH:      controls = 12'b100010_10_1_10_0;
+        FETCH:      controls = 13'b100010_10_1_10_0_0;
             // NextPC= 1;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 1; AdrSrc= 0
-            // ResultSrc= 10; ALUSrcA= 1;  ALUSrcB= 10; ALUOp= 0
+            // ResultSrc= 10; ALUSrcA= 1;  ALUSrcB= 10; ALUOp= 0; IsLongMul= 0;
         
-        DECODE:     controls = 12'b000000_10_1_10_0;
+        DECODE:     controls = 13'b000000_10_1_10_0_0;
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 10; ALUSrcA= 1;  ALUSrcB= 10; ALUOp= 0
+            // ResultSrc= 10; ALUSrcA= 1;  ALUSrcB= 10; ALUOp= 0; IsLongMul= 0;
         
-        EXECUTER:   controls = 12'b000000_00_0_00_1;
+        EXECUTER:   controls = 13'b000000_00_0_00_1_0;
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 1
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 1; IsLongMul= 0;
         
-        EXECUTEI:   controls = 12'b000000_00_0_01_1;
+        EXECUTEI:   controls = 13'b000000_00_0_01_1_0;
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 1
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 1; IsLongMul= 0;
         
-        MEMADR:     controls = 12'b000000_00_0_01_0; 
+        MEMADR:     controls = 13'b000000_00_0_01_0_0; 
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 0
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 0; IsLongMul= 0;
         
-        MEMRD:      controls = 12'b000001_00_0_00_0;
+        MEMRD:      controls = 13'b000001_00_0_00_0_0;
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 1
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
-        MEMWR:      controls = 12'b001001_00_0_00_0;
+        MEMWR:      controls = 13'b001001_00_0_00_0_0;
             // NextPC= 0;     Branch= 0;   MemW= 1;     RegW= 0; IRWrite= 0; AdrSrc= 1
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
-        MEMWB:      controls = 12'b000100_01_0_00_0;
+        MEMWB:      controls = 13'b000100_01_0_00_0_0;
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 01; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0
+            // ResultSrc= 01; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
-        ALUWB:      controls = 12'b000100_00_0_00_0; 
+        ALUWB:      controls = 13'b000100_00_0_00_0_0; 
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
-        BRANCH:     controls = 12'b010000_10_0_01_0;
+        BRANCH:     controls = 13'b010000_10_0_01_0_0;
             // NextPC= 0;     Branch= 1;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 10; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 0
+            // ResultSrc= 10; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 0; IsLongMul= 0;
+        ALUWB2:     controls = 13'b000100_00_0_00_0_1; 
+            // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 1;
         
-        default:    controls = 12'bxxxxxx_xx_x_xx_x;
+        
+        default:    controls = 13'bxxxxxx_xx_x_xx_x_x;
         endcase
-    assign {NextPC, Branch, MemW, RegW, IRWrite, AdrSrc, ResultSrc, ALUSrcA, ALUSrcB, ALUOp} = controls;
+    assign {NextPC, Branch, MemW, RegW, IRWrite, AdrSrc, ResultSrc, ALUSrcA, ALUSrcB, ALUOp, IsLongMul} = controls;
 endmodule
