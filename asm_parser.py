@@ -8,7 +8,7 @@ TOKEN_SPEC = {
     "REG": r"R(?:1[0-5]|[0-9])",                # R0, R1, ..., R15
     "POINTER": r"[A-Za-z_][A-Za-z0-9_]*",       # keyword instruction
     # "OP": r'[A-Z]{1,5}(EQ|NE|CS|CC|MI|PL|VS|VC|HI|LS|GE|LT|GT|LE|AL)?S?',
-    "IMM": r"#(?:0x[0-9a-fA-F]+|[0-9]+)",       # Immediate value
+    "IMM": r"#(?:0x[0-9a-fA-F]+|[0-9]+|\-[0-9]+)",       # Immediate value
     "COMMA": r",",                              # Comma
     "S_COLON": r";",                            # Statement terminator
     "L_BRACKET": r"\[",                         # Left bracket
@@ -22,10 +22,10 @@ def reg_val(r):
     if not (0 <= val <= 15):
         raise ValueError(f"Registro fuera de rango (0-15): {r}")
     return val
-def imm_val(s,m = 255):
-    val = int(s[1:], 0)
-    if not (0 <= val <= m):
-        raise ValueError(f"Inmediato fuera de rango (0-{m}): {s}")
+def imm_val(s):
+    val = -int(s[2:], 0) if s.startswith("#-") else int(s[1:], 0)
+    if not (-255 <= val <= 255):
+        raise ValueError(f"Inmediato fuera de rango (-255 : 255): {s}")
     return val
 
 class ARM_Assembler:
@@ -33,17 +33,12 @@ class ARM_Assembler:
         pattern = "|".join(f"(?P<{name}>{regex})" for name, regex in TOKEN_SPEC.items())
         self.regex = re.compile(pattern, re.IGNORECASE)
 
-        self.DP_INS = DP_INS
-        self.MEM_INS = MEM_INS
-        self.B_INS = B_INS
-        self.CONDS = CONDS
-
         self.labels = {}
         self.valid_ops = (
-            list(self.DP_INS.keys())
-            + list(self.MEM_INS.keys())
-            + list(self.B_INS.keys())
-            # + list(self.spc_instr.keys())
+            list(DP_INS.keys())
+            + list(MEM_INS.keys())
+            + list(B_INS.keys())
+            + list(TWOREG_INS.keys())
         )
 
     # Only for tokenization purposes
@@ -56,7 +51,7 @@ class ARM_Assembler:
             if kind == "POINTER":
                 possible_instr, cond, S = self.decode_mnemonic(value)
                 # validate if the instruction is valid
-                if possible_instr in self.valid_ops and cond in self.CONDS:
+                if possible_instr in self.valid_ops and cond in CONDS:
                     kind = "OP"
             tokens.append((kind, value))
         return tokens
@@ -69,7 +64,7 @@ class ARM_Assembler:
         if flags:
             instr = instr[:-1]
         cond = "AL"
-        for suffix in self.CONDS:
+        for suffix in CONDS:
             if instr.endswith(suffix):
                 cond = suffix
                 instr = instr[: -len(suffix)]
@@ -98,13 +93,36 @@ class ARM_Assembler:
         
         regs = [reg_val(v) for (k, v) in tokens if k == "REG"]
         imms = [imm_val(v) for (k, v) in tokens if k == "IMM"]
+        neg = imms[0] < 0 if imms else False
         # OP == DP
-        if instr in self.DP_INS:
+        if instr in TWOREG_INS:
+            if len(regs) == 4:
+                Rd, Rn, Rm, Ra = regs
+                I = 0
+            else:
+                raise RuntimeError("Invalid DP format")
+            
+            cmd = TWOREG_INS[instr]
+
+            # format [mulOp] Rd, Rn, Rm, Ra
+            return (
+                (CONDS[cond] << 28)                 # cond
+                                                    # op = 00
+                | (cmd << 21)                       # cmd
+                | (S << 20)                         # S
+                | (Rd << 16)                        # Rn
+                | (Ra << 12)                        # Rd
+                | (Rm << 8)                         # Rm
+                | (0b1001 << 4)                     # 0b1001
+                | Rn                                # Rn
+            )
+
+        if instr in DP_INS:
             # Custom DP exceptions
             if instr == "MOV":
                 S = 0
                 Rn = 0
-                cmd = self.DP_INS[instr]
+                cmd = DP_INS[instr]
 
                 if len(regs) == 1 and len(imms) == 1:
                     # MOV Rd, #imm
@@ -123,7 +141,7 @@ class ARM_Assembler:
 
                 # Format MOV Rd, Rm or MOV Rd, #imm
                 return (
-                    (self.CONDS[cond] << 28)        # cond
+                    (CONDS[cond] << 28)             # cond
                                                     # op = 00
                     | (I << 25)                     # I
                     | (cmd << 21)                   # cmd
@@ -144,7 +162,7 @@ class ARM_Assembler:
                 Rd, Rn, Rm = regs
                 # format MUL Rd, Rn, Rm
                 return (
-                    (self.CONDS[cond] << 28)        # cond
+                    (CONDS[cond] << 28)             # cond
                                                     # op = 00
                     | (S << 20)                     # S
                     | (Rd << 16)                    # Rd
@@ -164,11 +182,11 @@ class ARM_Assembler:
                 shift_imm = imms[0]
                 shift_type = shift_instrs.index(instr)             # index <-> encoding
                 shift = (shift_imm << 7) | (shift_type << 5) | Rm  # [shamt sh 0 Rm]
-                cmd = self.DP_INS[instr]
+                cmd = DP_INS[instr]
                 
                 # format [SH] Rd, Rm, #imm
                 return (
-                    (self.CONDS[cond] << 28)        # cond
+                    (CONDS[cond] << 28)             # cond
                     | (0 << 25)                     # I
                     | (cmd << 21)                   # cmd
                     | (S << 20)                     # S
@@ -185,14 +203,19 @@ class ARM_Assembler:
             elif len(regs) == 2 and imms:
                 Rd, Rn = regs
                 I = 1
-                operand2 = imms[0]
+                operand2 = -(imms[0]) if neg else imms[0]
             else:
                 raise RuntimeError("Invalid DP format")
-            cmd = self.DP_INS[instr]
+            cmd = DP_INS[instr]
+
+            if (cmd == 0b0100 and neg):
+                cmd = 0b0010  # Change ADD to SUB
+            elif (cmd == 0b0010 and neg):
+                cmd = 0b0100  # Change SUB to ADD
 
             # format [DPop] Rd, Rn, Rm  ;  [DPop] Rd, Rn, #imm
             return (
-                (self.CONDS[cond] << 28)            # cond
+                (CONDS[cond] << 28)                 # cond
                                                     # op = 00
                 | (I << 25)                         # I
                 | (cmd << 21)                       # cmd
@@ -203,10 +226,10 @@ class ARM_Assembler:
             )
 
         # OP == MEM
-        if instr in self.MEM_INS:
+        if instr in MEM_INS:
             #Check if MEM R1, [REG,REG] or [REG,IMM]
             Rd, Rn = regs[:2]
-            code = self.MEM_INS[instr]
+            code = MEM_INS[instr]
             L = code & 1
             B = (code >> 1) & 1
             
@@ -223,7 +246,7 @@ class ARM_Assembler:
             
             # format [MEM] Rd, [Rn, Rm]  ;  [MEM] Rd, [Rn, #imm]
             return (
-                (self.CONDS[cond] << 28)            # cond
+                (CONDS[cond] << 28)                 # cond
                 | (1 << 26)                         # op = 01
                 | (I << 25)                         # I
                 | (0b11 << 23)                      # PU = 11
@@ -236,14 +259,14 @@ class ARM_Assembler:
             )
 
         # OP == B
-        if instr in self.B_INS:
+        if instr in B_INS:
             label_tok = next((v for (k, v) in tokens if k == "POINTER"), None)
             if label_tok is None:
                 raise RuntimeError("Falta label en B")
             if label_tok not in self.labels:
                 raise RuntimeError(f"Label no definido: {label_tok}")
             offset = self.labels[label_tok] - (pc + 2)
-            return ((self.CONDS[cond] << 28)        # cond
+            return ((CONDS[cond] << 28)             # cond
                    | (0b101 << 25)                  # op = 10
                    | (offset & 0xFFFFFF))           # offset
 

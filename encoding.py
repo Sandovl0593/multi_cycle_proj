@@ -13,6 +13,7 @@ DP_INS = {
     "ASR": 0b1101,
     "ROR": 0b1101,
     "MUL": 0b0000,
+    "DIV": 0b1111,
 }
 
 MEM_INS = {
@@ -44,6 +45,7 @@ CONDS = {
     "AL": 0b1110,
 }
 
-# spc_instr = {
-#     "ADDLNG": 0,  # Special instruction example
-# }
+TWOREG_INS = {
+    "UMULL": 0b0100,
+    "SMULL": 0b0110,
+}
