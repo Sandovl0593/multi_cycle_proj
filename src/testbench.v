@@ -7,12 +7,15 @@ module testbench;
     wire [3:0] ALUFlags;
     wire [2:0] ALUControl;
     wire opMul;
+    wire IsLongMul;
     wire [3:0] Rn;           // Para ver Rn
     wire [31:0] SrcA;        // para ver SrcA
     wire [3:0] Rm;           // Para ver Rm (DP) o Rd (Mem Inmediate)
     wire [31:0] SrcB;        // para ver SrcB
     wire [3:0] Rd;           // Para ver escritura
+    wire [3:0] Ra;           // Para ver Ra en el caso de SMULL, UMULL
     wire [31:0] ALUResult;   // Para ver el resultado de la ALU
+    wire [31:0] ALUResult2;    // visualizar resultado mul 64:32
     wire [31:0] Result;
     wire [3:0] state;
 
@@ -33,13 +36,16 @@ module testbench;
         .ReadData(ReadData),
         .state(state),
         .opMul(opMul),
+        .IsLongMul(IsLongMul),         //new smull y umull
         // nuevos visualizadores
         .SrcA(SrcA),        // para ver SrcA
         .SrcB(SrcB),        // para ver SrcB
         .Rn(Rn),           // Para ver Rn
         .Rm(Rm),           // Para ver Rm (DP) o Rd (Mem Inmediate)
         .Rd(Rd),           // Para ver escritura
+        .Ra(Ra),                  // Para ver Ra en el SMULL y UMULL
         .ALUResult(ALUResult), // Para ver el resultado de la ALU
+        .ALUResult2(ALUResult2),    // visualizar resultado mul 64:32
         .ALUFlags(ALUFlags),
         .RegWrite(RegWrite),
         .ALUControl(ALUControl)
