@@ -23,7 +23,7 @@ module decode (
     
     // ALU Decoder signals 
     output reg [1:0] FlagW,         // -> [ condlogic ]
-    output reg [2:0] ALUControl,    // -> [ datapath ]
+    output reg [3:0] ALUControl,    // -> [ datapath ]
     // Op Decoder signals
     output wire opMul,              // MUL
     output wire [1:0] ImmSrc,       // -> [ datapath ]
@@ -64,29 +64,41 @@ module decode (
     always @(*)
         if (ALUOp) begin
             case(Funct[4:1])
-                4'b0100:
-                if (opMul)//es del tipo Multiply:
-                    ALUControl = 3'b101; // UMULL
-                else 
-                    ALUControl = 3'b000; // ADD
-                4'b0010: ALUControl = 3'b001; // SUB
                 4'b0000:
                 if (opMul)//es del tipo Multiply:
-                    ALUControl = 3'b100; // MUL
+                    ALUControl = 4'b0100; // MUL
                 else 
-                    ALUControl = 3'b010; // AND
-                4'b0110: ALUControl = 3'b110; // SMULL y aqui no le agregamos la condicion de Multiply
+                    ALUControl = 4'b0010; // AND
+                    
+                4'b0001: ALUControl = 4'b1000; //FPADD32
+                
+                4'b0010: ALUControl = 4'b0001; // SUB
+                
+                4'b0011: ALUControl = 4'b1001; //FPADD16 
+                         
+                4'b0100:
+                if (opMul)//es del tipo Multiply:
+                    ALUControl = 4'b0101; // UMULL
+                else 
+                    ALUControl = 3'b000; // ADD
+                    
+                4'b0101: ALUControl = 4'b1010; //FPMUL32
+                
+                4'b0110: ALUControl = 4'b0110; // SMULL y aqui no le agregamos la condicion de Multiply
                 // porque no repite Funct con otra instruccion
-                4'b1100: ALUControl = 3'b011; // ORR
-                4'b1111: ALUControl = 3'b111; //DIV
+                
+                4'b0111: ALUControl = 4'b1010; //FPMUL16
+                4'b1100: ALUControl = 4'b0011; // ORR
+                4'b1111: ALUControl = 4'b0111; //DIV
+                4'b1101: ALUControl = 4'b1100;  // MOV
 
-                default: ALUControl = 3'bxxx;
+                default: ALUControl = 4'bxxxx;
             endcase
             
             FlagW[1] = Funct[0]; 
-            FlagW[0] = Funct[0] & (ALUControl == 3'b000 | ALUControl == 3'b001 | ALUControl == 3'b100);
+            FlagW[0] = Funct[0] & (ALUControl == 4'b0000 | ALUControl == 4'b0001 | ALUControl == 4'b0100);
         end else begin
-            ALUControl = 3'b000; 
+            ALUControl = 4'b0000; 
             FlagW = 2'b00; 
         end
 
