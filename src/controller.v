@@ -30,6 +30,7 @@ module controller (
     wire NextPC;
     wire RegW;
     wire MemW;
+    wire noWrite; // caso de CMP
 
     decode dec(
         .clk(clk),
@@ -58,6 +59,7 @@ module controller (
         .RegSrc(RegSrc),
 
         .state(state),
+        .noWrite(noWrite), // caso de CMP
         .opMul(opMul),//para Multiply
         .IsLongMul(IsLongMul) //new output
     );
@@ -72,6 +74,7 @@ module controller (
         .NextPC(NextPC),
         .RegW(RegW),
         .MemW(MemW),
+        .noWrite(noWrite), // caso de CMP
         // Outputs to [ datapath ]
         .PCWrite(PCWrite),
         .RegWrite(RegWrite),

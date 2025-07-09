@@ -14,6 +14,7 @@ DP_INS = {
     "ROR": 0b1101,
     "MUL": 0b0000,
     "DIV": 0b1111,
+    "CMP": 0b1010,
     "FPADD32": 0b0001,
     "FPADD16": 0b0011,
     "FPMUL32": 0b0101,
@@ -21,7 +22,7 @@ DP_INS = {
 }
 
 MEM_INS = {
-    "STR": 0b00,
+    "STR": 0b00, 
     "LDR": 0b01,
     "STRB": 0b10,
     "LDRB": 0b11,

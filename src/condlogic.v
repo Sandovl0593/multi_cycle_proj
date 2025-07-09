@@ -10,6 +10,7 @@ module condlogic (
     input wire NextPC,
     input wire RegW,
     input wire MemW,
+    input wire noWrite, // caso de CMP
 
     output wire PCWrite,        // -> update PC?
     output wire RegWrite,       // -> load en registro?
@@ -52,7 +53,7 @@ module condlogic (
     );
 
     assign FlagWrite = FlagW & {2{CondEx}};             // Set Flags si cumple la condición
-    assign RegWrite = RegW & CondExNextInstr;
+    assign RegWrite = RegW & CondExNextInstr & ~noWrite; // Set RegWrite si cumple la condición y no es CMP
     assign MemWrite = MemW & CondExNextInstr;
     assign PCWrite = (PCS & CondExNextInstr) | NextPC;
 

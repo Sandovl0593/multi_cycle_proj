@@ -8,7 +8,8 @@ TOKEN_SPEC = {
     "REG": r"R(?:1[0-5]|[0-9])",                # R0, R1, ..., R15
     "POINTER": r"[A-Za-z_][A-Za-z0-9_]*",       # keyword instruction
     # "OP": r'[A-Z]{1,5}(EQ|NE|CS|CC|MI|PL|VS|VC|HI|LS|GE|LT|GT|LE|AL)?S?',
-    "IMM": r"#(?:0x[0-9a-fA-F]+|[-]?[0-9]+(\.[0-9]+)?)",   # Immediate value
+    "IMM_HEX": r"#0x[0-9a-fA-F]+",   # Immediate hex value
+    "IMM_DEC": r"#[-]?[0-9]+(\.[0-9]+)?",  # Immediate decimal value
     "COMMA": r",",                              # Comma
     "S_COLON": r";",                            # Statement terminator
     "L_BRACKET": r"\[",                         # Left bracket
@@ -22,13 +23,29 @@ def reg_val(r):
     if not (0 <= val <= 15):
         raise ValueError(f"Registro fuera de rango (0-15): {r}")
     return val
-def imm_val(s):
-    if '.' in s:
-        val = -int(float(s[2:])) if s.startswith("#-") else int(float(s[1:]))
+def imm_val(type, s):
+    val = 0
+    if type == "IMM_HEX":
+        val = int(s[3:], 16)
+        # si el bit 31 está a 1, es negativo en two's-complement:
+        # if raw & (1 << 31):
+        #     val = raw - (1 << 32)
+        # else:
+        #     val = raw
+
+    elif type == "IMM_DEC":
+        if '.' in s:
+            # e.g. "#-123.45" o "#67.89" int(float()) ya trunca hacia cero
+            val = int(float(s[1:])) if not s.startswith("#-") else -int(float(s[2:]))
+        else:
+            # int(s[1:], 0) respeta prefijos 0x, 0o, etc; pero aquí son decimales
+            raw = int(s[1:], 10)
+            val = -raw if s.startswith("#-") else raw
     else:
-        val = -int(s[2:], 0) if s.startswith("#-") else int(s[1:], 0)
+        raise ValueError(f"Formato de inmediato no reconocido: {s}")
+
     if not (-255 <= val <= 255):
-        raise ValueError(f"Inmediato fuera de rango (-255 : 255): {s}")
+        raise ValueError(f"Inmediato fuera de rango (-255 : 255): {s}  →  {val}")
     return val
 
 class ARM_Assembler:
@@ -95,7 +112,7 @@ class ARM_Assembler:
         instr, cond, S = self.decode_mnemonic(w[1])
         
         regs = [reg_val(v) for (k, v) in tokens if k == "REG"]
-        imms = [imm_val(v) for (k, v) in tokens if k == "IMM"]
+        imms = [imm_val(k, v) for (k, v) in tokens if "IMM" in k]
         neg = imms[0] < 0 if imms else False
         # OP == DP
         if instr in TWOREG_INS:
@@ -122,6 +139,36 @@ class ARM_Assembler:
 
         if instr in DP_INS:
             # Custom DP exceptions
+            if instr == "CMP":
+                S = 1
+                cmd = DP_INS[instr]
+                if len(regs) == 1 and len(imms) == 1:
+                    # CMP Rd, #imm
+                    Rn = regs[0]
+                    operand2 = imms[0]
+                    I = 1
+                elif len(regs) == 2 and len(imms) == 0:
+                    # CMP Rd, Rm
+                    Rn, Rm = regs
+                    I = 0
+                    operand2 = Rm
+                else:
+                    raise RuntimeError(
+                        f"Invalid CMP format: should be CMP Rd, Rm or CMP Rd, #imm"
+                    )
+               
+
+                # Format CMP Rd, Rm or CMP Rd, #imm
+                return (
+                    (CONDS[cond] << 28)             # cond
+                                                    # op = 00
+                    | (I << 25)                     # I
+                    | (cmd << 21)                   # cmd
+                    | (S << 20)                     # S
+                    | (Rn << 16)                    # Rn
+                    | operand2                      # Src2
+                )
+
             if instr == "MOV":
                 S = 0
                 Rn = 0

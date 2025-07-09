@@ -28,7 +28,8 @@ module decode (
     output wire opMul,              // MUL
     output wire [1:0] ImmSrc,       // -> [ datapath ]
     output wire [1:0] RegSrc,       // -> [ datapath ]
-    output wire [3:0] state         // para ver los estados
+    output wire [3:0] state,        // para ver los estados
+    output wire noWrite              // caso de CMP
 );
     wire Branch;
     wire ALUOp;
@@ -60,6 +61,7 @@ module decode (
     
     // en el multiply el op es 00, los bits Instr[25:24] son 00 e IsMul == 4'b1001:
     assign opMul = (Op == 2'b00) & (IsMul == 4'b1001) & (Funct[5:4] == 2'b00);
+    assign noWrite = (Funct[4:1] == 4'b1010); // CMP -> SUB sin writeback
     
     always @(*)
         if (ALUOp) begin
@@ -73,6 +75,7 @@ module decode (
                 4'b0001: ALUControl = 4'b1000; //FPADD32
                 
                 4'b0010: ALUControl = 4'b0001; // SUB
+                4'b1010: ALUControl = 4'b0001; // CMP -> SUB without writeback
                 
                 4'b0011: ALUControl = 4'b1001; //FPADD16 
                          
