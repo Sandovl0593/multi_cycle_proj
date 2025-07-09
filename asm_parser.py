@@ -1,4 +1,4 @@
-# THIS CODE IS PROVIDED ON CLASS AND ADAPTED FOR THE PROJECT
+# THIS CODE IS PROVIDED ON THE SUBJECT AND ADAPTED FOR THE PROJECT
 import re
 import sys
 from encoding import *
@@ -8,7 +8,7 @@ TOKEN_SPEC = {
     "REG": r"R(?:1[0-5]|[0-9])",                # R0, R1, ..., R15
     "POINTER": r"[A-Za-z_][A-Za-z0-9_]*",       # keyword instruction
     # "OP": r'[A-Z]{1,5}(EQ|NE|CS|CC|MI|PL|VS|VC|HI|LS|GE|LT|GT|LE|AL)?S?',
-    "IMM": r"#(?:0x[0-9a-fA-F]+|[0-9]+|\-[0-9]+)",       # Immediate value
+    "IMM": r"#(?:0x[0-9a-fA-F]+|[-]?[0-9]+(\.[0-9]+)?)",   # Immediate value
     "COMMA": r",",                              # Comma
     "S_COLON": r";",                            # Statement terminator
     "L_BRACKET": r"\[",                         # Left bracket
@@ -23,7 +23,10 @@ def reg_val(r):
         raise ValueError(f"Registro fuera de rango (0-15): {r}")
     return val
 def imm_val(s):
-    val = -int(s[2:], 0) if s.startswith("#-") else int(s[1:], 0)
+    if '.' in s:
+        val = -int(float(s[2:])) if s.startswith("#-") else int(float(s[1:]))
+    else:
+        val = -int(s[2:], 0) if s.startswith("#-") else int(s[1:], 0)
     if not (-255 <= val <= 255):
         raise ValueError(f"Inmediato fuera de rango (-255 : 255): {s}")
     return val
