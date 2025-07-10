@@ -26,7 +26,8 @@ module arm (
     output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
     output wire [3:0] ALUFlags,
     output wire RegWrite,
-    output wire [3:0] ALUControl
+    output wire [3:0] ALUControl,
+    output wire [31:0] ALUOut
 );
 
     wire PCWrite;
@@ -102,6 +103,7 @@ module arm (
         .Rd(Rd),                  // Sale Rd para ver escritura
         .Ra(Ra),                  // Para ver Ra en el SMULL y UMULL
         .ALUResult(ALUResult),     // Para ver el resultado de la ALU
-        .ALUResult2(ALUResult2)    // visualizar resultado mul 64:32
+        .ALUResult2(ALUResult2),    // visualizar resultado mul 64:32
+        .ALUOut(ALUOut)
     );
 endmodule

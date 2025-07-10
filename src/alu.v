@@ -19,7 +19,7 @@ module alu (
     assign condinvb = ALUControl[0] ? ~b : b;
     assign sum = a + condinvb + ALUControl[0];
     
-    FloatingPointAdd32 FPADD32(
+    /*FloatingPointAdd32 FPADD32(
     .a(a),
     .b(b),
     .add32(ResultAdd32),
@@ -32,7 +32,6 @@ module alu (
     .add16(ResultAdd16),
     .flags(ALUFlagsAdd16)
     );
-    /*
     FloatingPointMul32 FPMUL32(
     .a(a),
     .b(b),
@@ -56,14 +55,14 @@ module alu (
             4'b0101: //UMULL
             begin
                 mul = a * b;
-                Result = mul[31:0];
-                Result2 = mul[63:32];          
+                Result2 = mul[31:0];
+                Result = mul[63:32];          
             end
             4'b0110: //SMULL
             begin
                 mul = $signed(a) * $signed(b);
-                Result = mul[31:0];
-                Result2 = mul[63:32]; 
+                Result2 = mul[31:0];
+                Result = mul[63:32]; 
             end
             4'b0111: Result = a / b;     //DIV
             4'b1000: Result = ResultAdd32;    //FPADD32
@@ -76,7 +75,7 @@ module alu (
   
     assign res2 = (ALUControl == 3'b110 | ALUControl == 3'b101); // es UMULL o SMULL
 
-    assign N = (res2) ? Result2[31] : Result[31];
+    assign N = Result[31];
 
     assign _Z = (Result == 32'b0 & (~res2 | (res2 & Result2 == 32'b0)));
     

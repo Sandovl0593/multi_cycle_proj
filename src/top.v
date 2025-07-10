@@ -26,7 +26,8 @@ module top (
 
     output wire [3:0] ALUFlags,
     output wire RegWrite,
-    output wire [3:0] ALUControl      //se expandió a 4 bits
+    output wire [3:0] ALUControl,      //se expandió a 4 bits
+    output wire [31:0] ALUOut
 );
 
     arm arm(
@@ -55,7 +56,8 @@ module top (
         .ALUResult2(ALUResult2),   // visualizar resultado mul 64:32
         .ALUFlags(ALUFlags),
         .RegWrite(RegWrite),
-        .ALUControl(ALUControl)
+        .ALUControl(ALUControl),
+        .ALUOut(ALUOut)
     );
     mem mem(
         .clk(clk),

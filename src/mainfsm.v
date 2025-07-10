@@ -98,16 +98,21 @@ module mainfsm (
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
             // ResultSrc= 01; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
-        ALUWB:      controls = 13'b000100_00_0_00_0_0; 
+        ALUWB:  begin
+            if (Funct[4:1] != 4'b0000 && opMul)
+                    controls = 13'b000100_00_0_00_0_1; // caso de UMULL o SMULL
+            else
+                    controls = 13'b000100_00_0_00_0_0;
+        end
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul if is UMULL or SMULL;
         
         BRANCH:     controls = 13'b010000_10_0_01_0_0;
             // NextPC= 0;     Branch= 1;   MemW= 0;     RegW= 0; IRWrite= 0; AdrSrc= 0
             // ResultSrc= 10; ALUSrcA= 0;  ALUSrcB= 01; ALUOp= 0; IsLongMul= 0;
-        ALUWB2:     controls = 13'b000100_00_0_00_0_1; 
+        ALUWB2:     controls = 13'b000100_00_0_00_0_0; 
             // NextPC= 0;     Branch= 0;   MemW= 0;     RegW= 1; IRWrite= 0; AdrSrc= 0
-            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 1;
+            // ResultSrc= 00; ALUSrcA= 0;  ALUSrcB= 00; ALUOp= 0; IsLongMul= 0;
         
         
         default:    controls = 13'bxxxxxx_xx_x_xx_x_x;

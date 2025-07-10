@@ -9,9 +9,9 @@ UMULL R4, R1,R2, R3         // (uns) 0xFFFFFFFF * 2 = 0x 00 00 00 01 FF FF FF FE
 SMULL R6, R1,R2, R5         // (sig) 0xFFFF...F * 2 = 0x FF FF FF FF FF FF FF FE
                             // R6 = 0xFFFFFFFE, R5 = 0xFFFFFFFF
 
-SUB R7, R4, R6              // --> R7 = 1 - 0xFFFFFFFF = 0
-ADD R8, R5, R3              // R8 = 0xFFFFFFFE - 0xFFFFFFFE = 0
-
+SUB R7, R4, R6              // R7 = 0xFFFFFFFE - 0xFFFFFFFE = 0
+ADD R8, R5, R3              // R8 = 0xFFFFFFFF + 1 = 0
+        
 CMP R7, R8
 
 // 1er test
@@ -28,22 +28,27 @@ B ERROR
 
 CHECKPOINT2:  
 MOV R4, #0x10               // R4 = 16
-MUL R4, R4, R4              // R4 = 16^2
-MUL R4, R4, R4              // R4 = 16^4
-MUL R4, R4, R4              // R4 = 16^8
-MUL R4, R4, R4              // R4 = 16^16
+MUL R4, R4, R4              // R4 = 16^2  = 0x100
+MUL R4, R4, R4              // R4 = 16^4  = 0x10000
+MOV R5, #0x10
+MUL R4, R4, R5              // R4 = 16^5  = 0x100000
+MUL R4, R4, R5              // R4 = 16^6  = 0x1000000
+MUL R4, R4, R5              // R4 = 16^7  = 0x10000000
 
 MOV R1, #8
-MUL R1, R1, R4              // = 0x800 = 8 * 16^16
+MUL R1, R1, R4              // = 0x800 = 8 * 16^7
                             // --> MOV R1, #0x80000000
 UMULLS R3, R1,R2, R10       // (uns) 0x80000000 * 2 = 0x 00 00 00 01 00 00 00 00
                             // --> [ R10 = 1 ], R3 = 0
                             // NZCV (activated in R3) -> 0000
 
 UMULLEQ R3, R3, R10, R10    // execute if Z = 1 -> (no happen)
+                            // --> finally R10 = 1
 
 B END
 
 ERROR:
 MOV R10, #0
 END:
+
+MOV R10, R10                // visualizar R10 (ALUResult)

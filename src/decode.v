@@ -53,7 +53,6 @@ module decode (
         .state(state),
         .opMul(opMul), //new input
         .IsLongMul(IsLongMul) //new output
-        
     );
 
     // Add code for the ALU Decoder and PC Logic.    

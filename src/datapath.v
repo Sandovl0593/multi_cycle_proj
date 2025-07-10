@@ -35,7 +35,8 @@ module datapath (
     output wire [3:0] Rd,                 // Para ver escritura
     output wire [3:0] Ra,                 // Para ver Ra en el caso de SMULL, UMULL
     output wire [31:0] ALUResult,         // resultado 31:0
-    output wire [31:0] ALUResult2         // visualizar resultado mul 64:32
+    output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
+    output wire [31:0] ALUOut
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
@@ -43,7 +44,6 @@ module datapath (
     wire [31:0] RD1;
     wire [31:0] RD2;
     wire [31:0] A;
-    wire [31:0] ALUOut;
     wire [3:0] RA1;
     wire [3:0] RA2;
 
