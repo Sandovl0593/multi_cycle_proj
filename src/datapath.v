@@ -22,7 +22,7 @@ module datapath (
     input wire [1:0] ALUSrcB,
     input wire [1:0] ResultSrc,
     input wire [1:0] ImmSrc,
-    input wire [2:0] ALUControl,
+    input wire [3:0] ALUControl,
     output wire [31:0] PC,               // para visualizacion
     output wire [31:0] Result,
 

@@ -26,7 +26,7 @@ module top (
 
     output wire [3:0] ALUFlags,
     output wire RegWrite,
-    output wire [2:0] ALUControl
+    output wire [3:0] ALUControl      //se expandió a 4 bits
 );
 
     arm arm(

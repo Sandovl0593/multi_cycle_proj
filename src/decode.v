@@ -85,12 +85,12 @@ module decode (
                 else 
                     ALUControl = 3'b000; // ADD
                     
-                //4'b0101: ALUControl = 4'b1010; //FPMUL32
+                4'b0101: ALUControl = 4'b1010; //FPMUL32
                 
                 4'b0110: ALUControl = 4'b0110; // SMULL y aqui no le agregamos la condicion de Multiply
                 // porque no repite Funct con otra instruccion
                 
-                //4'b0111: ALUControl = 4'b1010; //FPMUL16
+                4'b0111: ALUControl = 4'b1010; //FPMUL16
                 4'b1100: ALUControl = 4'b0011; // ORR
                 4'b1111: ALUControl = 4'b0111; //DIV
                 4'b1101: ALUControl = 4'b1100;  // MOV

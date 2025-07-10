@@ -26,7 +26,7 @@ module arm (
     output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
     output wire [3:0] ALUFlags,
     output wire RegWrite,
-    output wire [2:0] ALUControl
+    output wire [3:0] ALUControl
 );
 
     wire PCWrite;

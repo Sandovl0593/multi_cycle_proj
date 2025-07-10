@@ -5,7 +5,7 @@ module testbench;
     wire [31:0] Instr;
     wire [31:0] Adr;
     wire [3:0] ALUFlags;
-    wire [2:0] ALUControl;
+    wire [3:0] ALUControl;   // Se expandió a 4 bits
     wire opMul;
     wire IsLongMul;
     wire [3:0] Rn;           // Para ver Rn

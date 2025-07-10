@@ -19,7 +19,7 @@ module controller (
     output wire [1:0] ALUSrcB,
     output wire [1:0] ResultSrc,
     output wire [1:0] ImmSrc,
-    output wire [2:0] ALUControl,
+    output wire [3:0] ALUControl,
     output wire [3:0] state,         // para ver los estados
     output wire opMul, //para MUL
     output wire IsLongMul//para tipo UMULL y SMULL
