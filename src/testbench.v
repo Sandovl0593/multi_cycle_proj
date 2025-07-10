@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module testbench;
     reg clk;
     reg reset;
@@ -54,12 +55,12 @@ module testbench;
     );
 
     initial begin
-        reset <= 1; #(22) ;
+        reset <= 1; #(10) ;
         reset <= 0;
     end
     always begin
-        clk <= 1; #(5) ;
-        clk <= 0; #(5) ;
+        clk <= 1; #(2) ;
+        clk <= 0; #(2) ;
     end
             
     initial begin
