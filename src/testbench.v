@@ -16,6 +16,7 @@ module testbench;
     wire [3:0] Ra;           // Para ver Ra en el caso de SMULL, UMULL
     wire [31:0] ALUResult;   // Para ver el resultado de la ALU
     wire [31:0] ALUResult2;    // visualizar resultado mul 64:32
+    wire [31:0] ALUOut;
     wire [31:0] Result;
     wire [3:0] state;
 
@@ -48,7 +49,8 @@ module testbench;
         .ALUResult2(ALUResult2),    // visualizar resultado mul 64:32
         .ALUFlags(ALUFlags),
         .RegWrite(RegWrite),
-        .ALUControl(ALUControl)
+        .ALUControl(ALUControl),
+        .ALUOut(ALUOut)
     );
 
     initial begin
