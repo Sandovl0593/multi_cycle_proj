@@ -5,30 +5,19 @@ MOV R0, #128; // ITERATIONS
 MOV R10, #0x10               // R10 = 16
 
 // Encuentra una manera de CARGAR los siguentes FLOAT de 32 BITS
-// FLOAT VARIABLES
 
 // (32bits en simulacion, 16bits en placa)
 
-MOV R1, #0x0          // 0.0f // X VALUE
-
-MOV R2, #0x42
-MUL R2, R3, R10       // R2 = 0x420
-MUL R2, R2, R10       // R2 = 0x4200 // 3.0f // DX VALUE
-
-MOV R3, #0x2E
-MUL R3, R3, R10         // R3 = 0x2E0
-MUL R3, R3, R10         // R3 = 0x2E00
-MOV R4, #0x66
-ADD R3, R3, R4          // R3 = Ox2E66 // 0.1f // DT
+// FLOAT VARIABLES  
+MOV R1, #0                 // X VALUE 
+MOV R2,     #0x4200        // #3.0 // DX VALUE
+MOV R3,     #0x00002E00
+ORR R3, R3, #0x00000066    // #0.1 // DT
 
 //// FLOAT CONSTANTS
-MOV R5, R3              // R5 = 0x00002E66 // 0.1f // B
-
-MOV R4, #0xB6
-MUL R4, R4, R10         // R4 = 0xB60
-MUL R4, R4, R10         // R4 = 0xB600
-MOV R6, #0x66
-ADD R4, R4, R6          // R4 = OxB666 // -0.4f // A
+MOV R4,     #0x0000B600
+ORR R4, R4, #0x00000066    // #-0.4 // DT
+MOV R5, R3                 // B
 
 FOR:
     // COMPUTE DF(X,DX) => DT * DX

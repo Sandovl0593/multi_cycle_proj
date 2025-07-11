@@ -1,6 +1,7 @@
 # THIS CODE IS PROVIDED ON THE SUBJECT AND ADAPTED FOR THE PROJECT
 import re
 import sys
+import struct
 from encoding import *
 
 TOKEN_SPEC = {
@@ -18,25 +19,26 @@ TOKEN_SPEC = {
     "UNKOWN": r"."                             # Unknown
 }
 
+def ror(value, shift):
+    """Rotate right 32-bit"""
+    shift %= 32
+    return ((value >> shift) | (value << (32 - shift))) & 0xFFFFFFFF
+
 def reg_val(r):
     val = int(r[1:])
     if not (0 <= val <= 15):
         raise ValueError(f"Registro fuera de rango (0-15): {r}")
     return val
+
 def imm_val(type, s):
     val = 0
     if type == "IMM_HEX":
         val = int(s[3:], 16)
-        # si el bit 31 está a 1, es negativo en two's-complement:
-        # if raw & (1 << 31):
-        #     val = raw - (1 << 32)
-        # else:
-        #     val = raw
 
     elif type == "IMM_DEC":
         if '.' in s:
             # e.g. "#-123.45" o "#67.89" int(float()) ya trunca hacia cero
-            val = int(float(s[1:])) if not s.startswith("#-") else -int(float(s[2:]))
+            val = -float(s[1:]) if s.startswith("#-") else float(s[1:])
         else:
             # int(s[1:], 0) respeta prefijos 0x, 0o, etc; pero aquí son decimales
             raw = int(s[1:], 10)
@@ -44,9 +46,25 @@ def imm_val(type, s):
     else:
         raise ValueError(f"Formato de inmediato no reconocido: {s}")
 
-    if not (-255 <= val <= 255):
-        raise ValueError(f"Inmediato fuera de rango (-255 : 255): {s}  →  {val}")
     return val
+
+def rot_format(val):
+    uimm = val & 0xFFFFFFFF
+    # Caso simple: cabe en 8 bits
+    if uimm <= 0xFF:
+        return uimm
+
+    # Intentamos cada rotación posible
+    for rot in range(16):
+        # Para que imm = ROR(imm8, rot*2), inmovilizamos:
+        #   imm8 = ROL(imm, rot*2) & 0xFF
+        sh = (rot * 2) % 32
+        imm8 = ((uimm << sh) | (uimm >> (32 - sh))) & 0xFF
+
+        # Comprobamos que reconstruye idéntico
+        if ror(imm8, sh) == uimm:
+            return (rot << 8) | imm8
+    raise ValueError(f"Valor inmediato no convertible a formato rotado: {val:#010x}")
 
 class ARM_Assembler:
     def __init__(self):
@@ -145,7 +163,7 @@ class ARM_Assembler:
                 if len(regs) == 1 and len(imms) == 1:
                     # CMP Rd, #imm
                     Rn = regs[0]
-                    operand2 = imms[0]
+                    operand2 = rot_format(imms[0])
                     I = 1
                 elif len(regs) == 2 and len(imms) == 0:
                     # CMP Rd, Rm
@@ -177,7 +195,7 @@ class ARM_Assembler:
                 if len(regs) == 1 and len(imms) == 1:
                     # MOV Rd, #imm
                     Rd = regs[0]
-                    operand2 = imms[0]
+                    operand2 = rot_format(imms[0])
                     I = 1
                 elif len(regs) == 2 and len(imms) == 0:
                     # MOV Rd, Rm
@@ -253,7 +271,7 @@ class ARM_Assembler:
             elif len(regs) == 2 and imms:
                 Rd, Rn = regs
                 I = 1
-                operand2 = -(imms[0]) if neg else imms[0]
+                operand2 = rot_format(imms[0])
             else:
                 raise RuntimeError("Invalid DP format")
             cmd = DP_INS[instr]

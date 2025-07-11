@@ -21,8 +21,8 @@ module top (
     output wire [3:0] Rm,           // Para ver Rm (DP) o Rd (Mem Inmediate)
     output wire [3:0] Rd,           // Para ver escritura
     output wire [3:0] Ra,           // Para ver Ra en el caso de SMULL, UMULL
-    output wire [31:0] ALUResult,    // Para ver el resultado de la ALU
-    output wire [31:0] ALUResult2,    // visualizar resultado mul 64:32
+    output wire [31:0] ALUResult,    // resultado 31:0 (64:32 si es UMULL/SMULL)
+    output wire [31:0] ALUResult2,    // visualizar resultado mul 31:0 si es UMULL/SMULL
 
     output wire [3:0] ALUFlags,
     output wire RegWrite,
