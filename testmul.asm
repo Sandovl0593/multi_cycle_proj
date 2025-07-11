@@ -27,17 +27,7 @@ BLT CHECKPOINT2             // if LT cond -> N xor V = 1
 B ERROR 
 
 CHECKPOINT2:  
-MOV R4, #0x10               // R4 = 16
-MUL R4, R4, R4              // R4 = 16^2  = 0x100
-MUL R4, R4, R4              // R4 = 16^4  = 0x10000
-MOV R5, #0x10
-MUL R4, R4, R5              // R4 = 16^5  = 0x100000
-MUL R4, R4, R5              // R4 = 16^6  = 0x1000000
-MUL R4, R4, R5              // R4 = 16^7  = 0x10000000
-
-MOV R1, #8
-MUL R1, R1, R4              // = 0x800 = 8 * 16^7
-                            // --> MOV R1, #0x80000000
+MOV R1, #0x80000000
 UMULLS R3, R1,R2, R10       // (uns) 0x80000000 * 2 = 0x 00 00 00 01 00 00 00 00
                             // --> [ R10 = 1 ], R3 = 0
                             // NZCV (activated in R3) -> 0000

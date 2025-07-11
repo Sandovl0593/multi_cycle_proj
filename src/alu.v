@@ -19,32 +19,32 @@ module alu (
     assign condinvb = ALUControl[0] ? ~b : b;
     assign sum = a + condinvb + ALUControl[0];
     
-    /*FloatingPointAdd32 FPADD32(
-    .a(a),
-    .b(b),
-    .add32(ResultAdd32),
-    .flags(ALUFlagsAdd32)
+    FloatingPointAdd32 FPADD32(
+        .a(a),
+        .b(b),
+        .add32(ResultAdd32),
+        .flags(ALUFlagsAdd32)
     );
     
     FloatingPointAdd16 FPADD16(
-    .a(a),
-    .b(b),
-    .add16(ResultAdd16),
-    .flags(ALUFlagsAdd16)
+        .a(a),
+        .b(b),
+        .add16(ResultAdd16),
+        .flags(ALUFlagsAdd16)
     );
     FloatingPointMul32 FPMUL32(
-    .a(a),
-    .b(b),
-    .mul32(ResultMul32),
-    .flags(ALUFlagsMul32)
+        .a(a),
+        .b(b),
+        .mul32(ResultMul32),
+        .flags(ALUFlagsMul32)
     );
     
     FloatingPointMul16 FPMUL16(
-    .a(a),
-    .b(b),
-    .mul16(ResultMul16),
-    .flags(ALUFlagsMul16)
-    );*/
+        .a(a),
+        .b(b),
+        .mul16(ResultMul16),
+        .flags(ALUFlagsMul16)
+    );
 
     always @(*)
         casex (ALUControl[3:0])//se extendió a 4 bits por el FP(add y mul)
@@ -67,8 +67,8 @@ module alu (
             4'b0111: Result = a / b;     //DIV
             4'b1000: Result = ResultAdd32;    //FPADD32
             4'b1001: Result = ResultAdd16;    //FPADD16
-            //4'b1010: Result = ResultMul32;    //FPMUL32
-            //4'b1011: Result = ResultMul16;    //FPMUL16
+            4'b1010: Result = ResultMul32;    //FPMUL32
+            4'b1011: Result = ResultMul16;    //FPMUL16
             4'b1100: Result = b;              //MOV
             default: Result2 = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
         endcase
