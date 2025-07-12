@@ -2,7 +2,7 @@ module alu (
     input [31:0] a, b,
     input [3:0] ALUControl, //se extendió a 4 bits por el FP(add y mul)
     output reg [31:0] Result,
-    output reg [31:0] Result2,//el resultado de la mitad menos significativa del mul de 64bits
+    output reg [31:0] Result2,//el resultado de la mitad más significativa del mul de 64bits
     output reg [3:0] ALUFlags
 );
   
