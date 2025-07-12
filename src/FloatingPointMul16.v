@@ -1,7 +1,7 @@
 module FloatingPointMul16(
     input  [15:0] a,
     input  [15:0] b,
-    output wire [15:0] mul16,
+    output wire [31:0] mul16,    // Resultado final ahora de 32 bits (zero-extended)
     output wire [3:0] flags // [overflow, zero, carry (no usado), negative]
 );
 
@@ -78,7 +78,7 @@ module FloatingPointMul16(
             flags_reg[0] = 1; // negative
     end
 
-    assign mul16 = productoTemp;
+    assign mul16 = {16'b0,productoTemp};
     assign flags = flags_reg;
 
 endmodule
