@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 module FloatingPointAdd16(
     input wire [15:0] a,
     input wire [15:0] b,
@@ -17,6 +15,7 @@ module FloatingPointAdd16(
     reg [5:0] expResul;              // 6 bits para detectar overflow
     reg [11:0] mantissaResul;        // 1 bit extra para carry
 
+    integer i;
     always @(*) begin
         // Inicializamos flags
         zero = 0;
@@ -82,13 +81,25 @@ module FloatingPointAdd16(
             end else begin
                 add16 = {signResul, expResul[4:0], mantissaResul[9:0]};
             end
-        end else begin
+            
+        end 
+        /*else begin
             while (mantissaResul[10] == 0 && expResul != 0) begin
                 mantissaResul = mantissaResul << 1; // mantissa resultante se normaliza
                 expResul = expResul - 1;
             end
             add16 = {signResul, expResul[4:0], mantissaResul[9:0]};
-        end
+        end*/
+         
+        else begin // Normalización si los signos eran distintos
+            for (i = 0; i < 11; i = i + 1) begin
+                if (mantissaResul[10] == 0 && expResul != 0) begin
+                    mantissaResul = mantissaResul << 1;
+                    expResul = expResul - 1;
+                end
+            end
+            add16 = {signResul, expResul[4:0], mantissaResul[9:0]};
+        end 
 
         // Verificamos resultado cero
         if (add16[14:0] == 15'b0) begin
@@ -106,3 +117,5 @@ module FloatingPointAdd16(
     assign flags = {negative, zero, carry, overflow};
 
 endmodule
+
+

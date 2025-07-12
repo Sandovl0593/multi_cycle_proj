@@ -17,7 +17,7 @@ ORR R3, R3, #0x0000CC00
 ORR R3, R3, #0x000000CD    // R3 = 0.1 // DT
 
 //// FLOAT CONSTANTS
-MOV R4,     #0xBE000000
+MOV R4,     #0x3E000000
 ORR R4, R4, #0x00CC0000
 ORR R4, R4, #0x0000CC00
 ORR R4, R4, #0x000000CD    // R4 = 0.4 // DT
@@ -26,7 +26,10 @@ MOV R5, R3                 // R5 = 0.1  // B
 FOR:
     // COMPUTE DF(X,DX) => DT * DX
     MOV R6, R2                                  // R6 = 3.0               -> 3.0
-    FPMUL32 R6, R6, R3                          // R6 = 3.0 * 0.1 = 0.3   -> 3.0 + 0.1 = 0.3
+
+    FPADD32 R11, R3, R3
+
+    FPMUL32 R6, R6, R3                          // R6 = 3.0 * 0.1 = 0.03   -> 3.0 + 0.1 = 0.3
     
     // COMPUTE DF(V,DT) = DT * (A * X + B * DX)
     MOV R7, R1                                  // R7 = 0                 -> 0.03

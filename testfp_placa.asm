@@ -2,7 +2,6 @@
 // 2nd order ODE integrator PROGRAM
 
 MOV R0, #128; // ITERATIONS
-MOV R10, #0x10               // R10 = 16
 
 // Encuentra una manera de CARGAR los siguentes FLOAT de 32 BITS
 
@@ -38,7 +37,7 @@ FOR:
     FPADD16 R1, R1, R6 // X = X + DF(X,DX)
     FPADD16 R2, R2, R7 // DX = DX + DF(V,DT)
     
-    SUB R0, R0, #1
+    SUBS R0, R0, #1
     BEQ END_FOR
     B FOR
 

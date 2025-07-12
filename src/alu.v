@@ -4,6 +4,7 @@ module alu (
     output reg [31:0] Result,
     output reg [31:0] Result2,//el resultado de la mitad menos significativa del mul de 64bits
     output reg [3:0] ALUFlags
+    //output wire [3:0] ALUFlags
 );
   
     wire N, _Z, C, V;
@@ -27,8 +28,8 @@ module alu (
     );
     
     FloatingPointAdd16 FPADD16(
-        .a(a),
-        .b(b),
+        .a(a[15:0]),
+        .b(b[15:0]),
         .add16(ResultAdd16),
         .flags(ALUFlagsAdd16)
     );
@@ -40,8 +41,8 @@ module alu (
     );
     
     FloatingPointMul16 FPMUL16(
-        .a(a),
-        .b(b),
+        .a(a[15:0]),
+        .b(b[15:0]),
         .mul16(ResultMul16),
         .flags(ALUFlagsMul16)
     );
@@ -93,6 +94,6 @@ module alu (
             4'b1011: ALUFlags = ALUFlagsMul16;     //FPMUL16
             default: ALUFlags = {N, _Z, C, V};
         endcase
-    end   
+    end
     //assign ALUFlags = {N, _Z, C, V};
 endmodule

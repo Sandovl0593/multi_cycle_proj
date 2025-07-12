@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 module FloatingPointAdd32(
     input wire [31:0] a,
     input wire [31:0] b,
@@ -20,6 +18,7 @@ module FloatingPointAdd32(
     reg [8:0] expResul;    // signo del resultado (el bit más significativo es para detectar si hay overflow o no)
     reg [24:0] mantissaResul;   //mantissa del resultado (el bit más significativo es para detectar si hay carry o no)
     
+    integer i;
     always @(*)begin
         //inicializamos los flags con 0
         zero = 0;
@@ -89,12 +88,14 @@ module FloatingPointAdd32(
             end
         end
         else begin // Normalización si los signos eran distintos
-            while (mantissaResul[23] == 0 && expResul != 0) begin
-                mantissaResul = mantissaResul << 1; // mantissa resultante se normaliza
-                expResul =  expResul - 1;
+            for (i = 0; i < 24; i = i + 1) begin
+                if (mantissaResul[23] == 0 && expResul != 0) begin
+                    mantissaResul = mantissaResul << 1;
+                    expResul = expResul - 1;
+                end
             end
-            add32 = {signResul, expResul[7:0] , mantissaResul[22:0]};
-        end
+            add32 = {signResul, expResul[7:0], mantissaResul[22:0]};
+        end 
         // Si el resultado es exactamente cero, se limpia el signo y todos los flags, y se activa zero
         if (add32[30:0] == 31'b0) begin
             add32[31] = 1'b0;
