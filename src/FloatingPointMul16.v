@@ -1,117 +1,84 @@
-`timescale 1ns / 1ps
-
 module FloatingPointMul16(
-    input [15:0] a,
-    input [15:0] b,
+    input  [15:0] a,
+    input  [15:0] b,
     output wire [15:0] mul16,
-    output wire [3:0] flags // Flags: [overflow, zero, carry, negative]
+    output wire [3:0] flags // [overflow, zero, carry (no usado), negative]
 );
 
-    // Salidas del clasificador para cada operando
-    wire Asnan, Aqnan, Ainf, Azero, Asubnormal, Anormal, Anegative, Aoverflow, Acarry;
-    wire Bsnan, Bqnan, Binf, Bzero, Bsubnormal, Bnormal, Bnegative, Boverflow, Bcarry;
+    parameter bias = 15; // para half-precision (5-bit exponent)
 
-    reg [15:0] resultadoTemp;
-    reg [21:0] partialResult;
-    reg [4:0] expa;
-    reg [4:0] expb;
-    reg [5:0] exponent;
-    reg Signo;
-    reg [3:0] flags_reg;
+    // Extraer campos IEEE 754 half-precision (16 bits)
+    wire signA = a[15];
+    wire signB = b[15];
+    wire [4:0] expA = a[14:10];
+    wire [4:0] expB = b[14:10];
+    wire [9:0] fracA = a[9:0];
+    wire [9:0] fracB = b[9:0];
 
-    parameter bias = 15; // Sesgo para half-precision
+    // Agregar bit implícito
+    wire [10:0] mantA = (expA == 0) ? {1'b0, fracA} : {1'b1, fracA};
+    wire [10:0] mantB = (expB == 0) ? {1'b0, fracB} : {1'b1, fracB};
 
-    // Clasificación de operandos
-    Fp_clasifier16 A (
-        .float(a),
-        .snan(Asnan), .qnan(Aqnan), .inf(Ainf), .zero(Azero),
-        .subnormal(Asubnormal), .normal(Anormal),
-        .negative(Anegative), .overflow(Aoverflow), .carry(Acarry)
-    );
+    // Multiplicación de mantisas (hasta 22 bits)
+    wire [21:0] mantProd = mantA * mantB;
 
-    Fp_clasifier16 B (
-        .float(b),
-        .snan(Bsnan), .qnan(Bqnan), .inf(Binf), .zero(Bzero),
-        .subnormal(Bsubnormal), .normal(Bnormal),
-        .negative(Bnegative), .overflow(Boverflow), .carry(Bcarry)
-    );
+    // Exponentes sin bias
+    wire signed [6:0] rawExpA = (expA == 0) ? 1 : expA;
+    wire signed [6:0] rawExpB = (expB == 0) ? 1 : expB;
+    reg   signed [7:0] exponent;
 
-    // Lógica principal de multiplicación
+    reg [15:0] productoTemp;
+    reg [3:0]  flags_reg;
+    reg        Signo;
+    reg [21:0] normMant;
+    reg [9:0]  finalMant;
+    reg [4:0]  finalExp;
+
+    integer shift;
+
     always @(*) begin
-        resultadoTemp = 0;
         flags_reg = 4'b0000;
-        Signo = a[15] ^ b[15]; // XOR de signos
+        productoTemp = 16'b0;
+        Signo = signA ^ signB;
 
-        // Caso 1: signaling NaN
-        if (Asnan | Bsnan) begin
-            resultadoTemp = Asnan ? a : b;
-            flags_reg = 4'b0000;
+        exponent = rawExpA + rawExpB - bias;
+
+        if (mantProd[21]) begin
+            normMant = mantProd >> 1;
+            exponent = exponent + 1;
+        end else begin
+            normMant = mantProd;
+            shift = 0;
+            while (normMant[20 - shift] == 0 && shift < 10) begin
+                shift = shift + 1;
+            end
+            normMant = normMant << shift;
+            exponent = exponent - shift;
         end
 
-        // Caso 2: quiet NaN
-        else if (Aqnan | Bqnan) begin
-            resultadoTemp = Aqnan ? a : b;
-            flags_reg = 4'b0000;
+        finalMant = normMant[19:10];
+        finalExp = exponent[4:0];
+
+        if (expA == 5'b11111 || expB == 5'b11111) begin
+            productoTemp = 16'h7E00; // NaN en half-precision
+            flags_reg[2] = 1;
+        end else if (exponent >= 31) begin
+            productoTemp = {Signo, 5'b11111, 10'b0}; // Inf
+            flags_reg[3] = 1; // overflow
+        end else if (exponent <= 0) begin
+            productoTemp = {Signo, 15'b0};
+            flags_reg[2] = 1; // zero
+        end else begin
+            productoTemp = {Signo, finalExp, finalMant};
+            if (productoTemp[14:0] == 0)
+                flags_reg[2] = 1; // zero
         end
 
-        // Caso 3: Infinito
-        else if (Ainf | Binf) begin
-            if (Azero | Bzero) begin
-                resultadoTemp = {Signo, 5'b11111, 1'b1, 9'b1}; // NaN
-                flags_reg = 4'b0000;
-            end else begin
-                resultadoTemp = {Signo, 5'b11111, 10'b0}; // Inf
-                flags_reg = 4'b0000;
-            end
-        end
-
-        // Caso 4: cero o ambos subnormales
-        else if (Azero | Bzero || (Asubnormal & Bsubnormal)) begin
-            resultadoTemp = {Signo, 15'b0}; // Resultado cero
-            flags_reg[1] = 1; // Activar flag de cero
-        end
-
-        // Caso 5: Multiplicación normal
-        else begin
-            expa = a[14:10] - bias;
-            expb = b[14:10] - bias;
-            exponent = expa + expb + bias;
-
-            // Multiplicación de mantisas con 1 implícito
-            partialResult = {1'b1, a[9:0]} * {1'b1, b[9:0]};
-
-            // Normalización si el bit más alto está encendido
-            if (partialResult[21]) begin
-                partialResult = partialResult >> 1;
-                exponent = exponent + 1;
-            end
-
-            // Caso: overflow de exponente
-            if (exponent > 30) begin
-                resultadoTemp = {Signo, 5'b11111, 10'b0}; // Inf
-                flags_reg[0] = 1; // Flag de overflow
-            end
-
-            // Caso: underflow (exponente < 1)
-            else if (exponent < 1) begin
-                resultadoTemp = {Signo, 15'b0}; // Resultado cero
-                flags_reg[1] = 1; // Flag de cero
-            end
-
-            // Resultado normal
-            else begin
-                resultadoTemp = {Signo, exponent[4:0], partialResult[19:10]};
-                flags_reg = 4'b0000;
-            end
-        end
-
-        // Flag negativo si MSB del resultado es 1
-        if (resultadoTemp[15] == 1)
-            flags_reg[3] = 1;
+        if (productoTemp[15])
+            flags_reg[0] = 1; // negative
     end
 
-    // Asignación final a las salidas
-    assign mul16 = resultadoTemp;
+    assign mul16 = productoTemp;
     assign flags = flags_reg;
 
 endmodule
