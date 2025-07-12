@@ -56,12 +56,12 @@ module testbench;
     );
 
     initial begin
-        reset <= 1; #(10) ;
+        reset <= 1; #(0.5) ;
         reset <= 0;
     end
     always begin
-        clk <= 1; #(2) ;
-        clk <= 0; #(2) ;
+        clk <= 1; #(0.01);
+        clk <= 0; #(0.01) ;
     end
             
     initial begin
