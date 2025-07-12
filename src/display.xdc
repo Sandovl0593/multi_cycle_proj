@@ -11,8 +11,8 @@ set_property CFGBVS VCCO [current_design]
 set_property PACKAGE_PIN U18 [get_ports reset]
 set_property IOSTANDARD LVCMOS33 [get_ports reset]
 
-set_property PACKAGE_PIN T17 [get_ports stop]
-set_property IOSTANDARD LVCMOS33 [get_ports stop]
+# set_property PACKAGE_PIN T17 [get_ports stop]
+# set_property IOSTANDARD LVCMOS33 [get_ports stop]
 
 ## Catodes
 set_property PACKAGE_PIN W7 [get_ports {catode[7]}] ;# A
@@ -24,8 +24,8 @@ set_property PACKAGE_PIN V5 [get_ports {catode[2]}] ;# F
 set_property PACKAGE_PIN U7 [get_ports {catode[1]}] ;# G
 set_property PACKAGE_PIN V7 [get_ports {catode[0]}] ;# P
 set_property IOSTANDARD LVCMOS33 [get_ports {catode[*]}]
-set_property DRIVE 4 [get_ports {catode[*]}]
-set_property SLEW SLOW [get_ports {catode[*]}]
+# set_property DRIVE 4 [get_ports {catode[*]}]
+# set_property SLEW SLOW [get_ports {catode[*]}]
 
 ## Anodes
 set_property PACKAGE_PIN U2 [get_ports {anode[0]}]
@@ -33,5 +33,5 @@ set_property PACKAGE_PIN U4 [get_ports {anode[1]}]
 set_property PACKAGE_PIN V4 [get_ports {anode[2]}]
 set_property PACKAGE_PIN W4 [get_ports {anode[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {anode[*]}]
-set_property DRIVE 4 [get_ports {anode[*]}]
-set_property SLEW SLOW [get_ports {anode[*]}]
+# set_property DRIVE 4 [get_ports {anode[*]}]
+# set_property SLEW SLOW [get_ports {anode[*]}]
