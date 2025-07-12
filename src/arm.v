@@ -22,12 +22,13 @@ module arm (
     output wire [3:0] Rm,           // Para ver Rm (DP) o Rd (Mem Inmediate)
     output wire [3:0] Rd,           // Para ver escritura
     output wire [3:0] Ra,           // Para ver Ra en el caso de SMULL, UMULL
-    output wire [31:0] ALUResult,     // resultado 31:0 (64:32 si es UMULL/SMULL)
-    output wire [31:0] ALUResult2,         // visualizar resultado mul 31:0 si es UMULL/SMULL
+    output wire [31:0] ALUResult,     // Para ver el resultado de la ALU
+    output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
     output wire [3:0] ALUFlags,
     output wire RegWrite,
     output wire [3:0] ALUControl,
-    output wire [31:0] ALUOut
+    output wire [31:0] ALUOut,
+    output wire [15:0] rdisplay      // display a value on visualizer (basys3)
 );
 
     wire PCWrite;
@@ -104,6 +105,8 @@ module arm (
         .Ra(Ra),                  // Para ver Ra en el SMULL y UMULL
         .ALUResult(ALUResult),     // Para ver el resultado de la ALU
         .ALUResult2(ALUResult2),    // visualizar resultado mul 64:32
-        .ALUOut(ALUOut)
+        .ALUOut(ALUOut),
+
+        .rdisplay(rdisplay)         // display a value on visualizer (basys3)
     );
 endmodule

@@ -6,6 +6,8 @@ MOV R2, #0x00000002         // R2 = 2
 UMULL R4, R1,R2, R3         // (uns) 0xFFFFFFFF * 2 = 0x 00 00 00 01 FF FF FF FE
                             // --> R4 = 0xFFFFFFFE, R3 = 1
 
+MOV R4, #0xAA              
+
 SMULL R6, R1,R2, R5         // (sig) 0xFFFF...F * 2 = 0x FF FF FF FF FF FF FF FE
                             // R6 = 0xFFFFFFFE, R5 = 0xFFFFFFFF
 

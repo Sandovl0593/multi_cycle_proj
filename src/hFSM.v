@@ -2,7 +2,7 @@ module hFSM(
     input clk,
     input reset,
     input [15:0] data,      // value
-    input wire [3:0] stateProg, // current state
+    //input wire [3:0] stateProg, // current state
     output reg [3:0] digit, // from 16bits -> nibble i ∈ 3-0
     output reg [3:0] anode  // anode i
 );
@@ -22,6 +22,7 @@ module hFSM(
             state <= nextstate;
         end
     end
+   
 
     // next state logic
     always @(*) begin
@@ -32,31 +33,27 @@ module hFSM(
             D3:      nextstate = D0;
             default: nextstate = D0;
         endcase
-    end
-    
-    // Output logic (digit and anode)
-    always @(*) begin
-        dataInstr = (stateProg == 4'd6 || stateProg == 4'd7) ? data :
-                        (stateProg == 4'd9) ? 16'hbbbb : dataInstr;
+        
+        
         case (state)
             D0: begin
-                digit = dataInstr[15:12]; // first digit
+                digit = data[15:12]; // first digit
                 anode = 4'b1000;  // AN3
             end
             D1: begin
-                digit = dataInstr[11:8]; // second digit
+                digit = data[11:8]; // second digit
                 anode = 4'b0100;  // AN2
             end
             D2: begin
-                digit = dataInstr[7:4]; // third digit
+                digit = data[7:4]; // third digit
                 anode = 4'b0010;  // AN1
             end
             D3: begin
-                digit = dataInstr[3:0]; // fourth digit
+                digit = data[3:0]; // fourth digit
                 anode = 4'b0001;  // AN0
             end
-       default: begin
-                digit = dataInstr[15:12]; // first digit
+        default: begin
+                digit = data[15:12]; // first digit
                 anode = 4'b1000;  // AN3
             end
         endcase

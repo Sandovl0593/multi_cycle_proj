@@ -34,9 +34,10 @@ module datapath (
     output wire [3:0] Rm,                 // Para ver Rm (DP) o Rd (Mem Inmediate)
     output wire [3:0] Rd,                 // Para ver escritura
     output wire [3:0] Ra,                 // Para ver Ra en el caso de SMULL, UMULL
-    output wire [31:0] ALUResult,         // resultado 31:0 (64:32 si es UMULL/SMULL)
-    output wire [31:0] ALUResult2,         // visualizar resultado mul 31:0 si es UMULL/SMULL
-    output wire [31:0] ALUOut
+    output wire [31:0] ALUResult,         // resultado 31:0
+    output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
+    output wire [31:0] ALUOut,
+    output wire [15:0] rdisplay
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
@@ -129,7 +130,8 @@ module datapath (
         .wd3(Result),
         .r15(Result),
         .rd1(RD1),
-        .rd2(RD2)
+        .rd2(RD2),
+        .rdisplay(rdisplay)
     );
 
     // Extend Immediate

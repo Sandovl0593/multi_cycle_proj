@@ -59,8 +59,11 @@ module top (
     wire [31:0] ALUOut;
     
     wire scl_clk;
+    wire [15:0] rdisplay;      // display a value on visualizer (
+    
     arm arm(
-        .clk(scl_clk),
+        //.clk(scl_clk),
+        .clk(clk),
         .reset(reset),
         .Result(Result),
         .MemWrite(MemWrite),
@@ -86,7 +89,9 @@ module top (
         .ALUFlags(ALUFlags),
         .RegWrite(RegWrite),
         .ALUControl(ALUControl),
-        .ALUOut(ALUOut)
+        .ALUOut(ALUOut),
+
+        .rdisplay(rdisplay)         // display a value on visualizer (basys3
     );
     CLKdivider sc(
         .in_clk(clk),
@@ -95,18 +100,20 @@ module top (
     );
     hex_display test(
         .clk(scl_clk), 
+        //.clk(clk), 
         .reset(reset), 
         //.PC(PC),
         //.Instr(Instr),
-        .state(state),
-        .data(ALUResult[15:0]),
+        //.state(state),
+        .data(rdisplay),
         .anode(anode),
         .catode(catode)
         //.ALUResult(ALUResult),
         //.state(state)
     );
     mem mem(
-        .clk(scl_clk),
+        //.clk(scl_clk),
+        .clk(clk),
         .we(MemWrite),
         .a(Adr),
         .wd(WriteData),
