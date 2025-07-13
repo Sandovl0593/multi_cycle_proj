@@ -1,37 +1,9 @@
 module top (
     input wire clk,
     input wire reset,
-    // Outputs de visualización en Testbench
-    /*output wire [31:0] Result,
-    output wire [31:0] WriteData,
-    output wire [31:0] Adr,
-    output wire MemWrite,
-    output wire [31:0] PC,
-    output wire [31:0] Instr,
-    output wire [31:0] ReadData,
-    output wire opMul, //para multiply
-    output wire IsLongMul,         //new para Umul y Smul
-
-    // nuevos visualizadores
-    output wire [31:0] SrcA,        // para ver SrcA
-    output wire [31:0] SrcB,        // para ver SrcB
-    // utiles para el multiply:
-    output wire [3:0] Rn,           // Para ver Rn
-    output wire [3:0] Rm,           // Para ver Rm (DP) o Rd (Mem Inmediate)
-    output wire [3:0] Rd,           // Para ver escritura
-    output wire [3:0] Ra,           // Para ver Ra en el caso de SMULL, UMULL
-    output wire [31:0] ALUResult,    // Para ver el resultado de la ALU
-    output wire [31:0] ALUResult2,    // visualizar resultado mul 64:32
-    output wire [3:0] state,
-    output wire [3:0] ALUFlags,
-    output wire RegWrite,
-    output wire [3:0] ALUControl,      //se expandió a 4 bits
-    output wire [31:0] ALUOut,*/
-
     output wire [3:0] anode,
     output wire [7:0] catode
 );
-    
     wire [31:0] Result;
     wire [31:0] WriteData;
     wire [31:0] Adr;
@@ -57,12 +29,12 @@ module top (
     wire RegWrite;
     wire [3:0] ALUControl;      //se expandió a 4 bits
     wire [31:0] ALUOut;
-    
-    wire scl_clk;
-    wire [15:0] rdisplay;      // display a value on visualizer (
-    
+
+    wire isRegWrite; // para el regfile
+    wire [31:0] rdisplay; // para el display
+    reg [15:0] displayData;      // display a value on visualizer
+
     arm arm(
-        //.clk(scl_clk),
         .clk(clk),
         .reset(reset),
         .Result(Result),
@@ -90,33 +62,31 @@ module top (
         .RegWrite(RegWrite),
         .ALUControl(ALUControl),
         .ALUOut(ALUOut),
-
         .rdisplay(rdisplay)         // display a value on visualizer (basys3
     );
-    CLKdivider sc(
-        .in_clk(clk),
-        .reset_clk(reset),
-        .out_clk(scl_clk)
-    );
-    hex_display test(
-        .clk(scl_clk), 
-        //.clk(clk), 
-        .reset(reset), 
-        //.PC(PC),
-        //.Instr(Instr),
-        //.state(state),
-        .data(rdisplay),
-        .anode(anode),
-        .catode(catode)
-        //.ALUResult(ALUResult),
-        //.state(state)
-    );
+    
+    //reg [15:0] displayData = 16'hff;
+    
     mem mem(
-        //.clk(scl_clk),
         .clk(clk),
         .we(MemWrite),
         .a(Adr),
         .wd(WriteData),
         .rd(ReadData)
+    );
+    
+    assign isRegWrite = RegWrite && (Rd == 4'b0011); // R3
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) displayData <= 16'd0; // reset display data
+        else if (isRegWrite) displayData <= rdisplay[15:0]; // update display data
+    end
+    
+    hex_display hex(
+        .clk(clk),
+        .reset(reset),
+        .data(displayData), // display value
+        .anode(anode),
+        .catode(catode)
     );
 endmodule

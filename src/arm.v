@@ -28,7 +28,7 @@ module arm (
     output wire RegWrite,
     output wire [3:0] ALUControl,
     output wire [31:0] ALUOut,
-    output wire [15:0] rdisplay      // display a value on visualizer (basys3)
+    output wire [31:0] rdisplay
 );
 
     wire PCWrite;
@@ -38,7 +38,7 @@ module arm (
     wire ALUSrcA;
     wire [1:0] ALUSrcB;
     wire [1:0] ImmSrc;
-    wire [1:0] ResultSrc;
+    wire [1:0] ResultSrc;   
 
     controller c(
         .clk(clk),
@@ -105,8 +105,8 @@ module arm (
         .Ra(Ra),                  // Para ver Ra en el SMULL y UMULL
         .ALUResult(ALUResult),     // Para ver el resultado de la ALU
         .ALUResult2(ALUResult2),    // visualizar resultado mul 64:32
-        .ALUOut(ALUOut),
-
-        .rdisplay(rdisplay)         // display a value on visualizer (basys3)
+        .ALUOut(ALUOut)
     );
+    
+    assign rdisplay = dp.rfile.rf[4'b0011];
 endmodule

@@ -1,12 +1,12 @@
 module CLKdivider(
-    input wire in_clk, 
-    input wire reset_clk,
+    input wire clk, 
+    input wire reset,
     output reg out_clk
 );
     reg [17:0] counter = 0;
     localparam MAX_COUNT = 18'd208333;  // 100e6 / 480 -> 208333
-    always @(posedge in_clk or posedge reset_clk) begin
-        if(reset_clk) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
             out_clk <= 0;
             counter <= 0;
         end

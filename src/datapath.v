@@ -36,8 +36,7 @@ module datapath (
     output wire [3:0] Ra,                 // Para ver Ra en el caso de SMULL, UMULL
     output wire [31:0] ALUResult,         // resultado 31:0
     output wire [31:0] ALUResult2,         // visualizar resultado mul 64:32
-    output wire [31:0] ALUOut,
-    output wire [15:0] rdisplay
+    output wire [31:0] ALUOut
 );
     wire [31:0] PCNext;
     wire [31:0] ExtImm;
@@ -47,6 +46,8 @@ module datapath (
     wire [31:0] A;
     wire [3:0] RA1;
     wire [3:0] RA2;
+    
+
 
     // Your datapath hardware goes below. Instantiate each of the 
     // submodules that you need. Remember that you can reuse hardware
@@ -119,7 +120,7 @@ module datapath (
     );
 
     // RA1, RA2 -> [ regfile ] -> RD1, RD2
-    regfile rf(
+    regfile rfile(
         .clk(clk),
         .we3(RegWrite),
         .we4(IsLongMul), //condicion para el SMULL, UMULL y escribir en el Ra
@@ -130,8 +131,7 @@ module datapath (
         .wd3(Result),
         .r15(Result),
         .rd1(RD1),
-        .rd2(RD2),
-        .rdisplay(rdisplay)
+        .rd2(RD2)
     );
 
     // Extend Immediate

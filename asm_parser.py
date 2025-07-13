@@ -422,15 +422,12 @@ if __name__ == "__main__":
 
     user_input = input("\n== Do you want to write directly to\nyour Vivado project? (y/n): ").strip().lower()
     if user_input == "y":
-        vivado_name_project = input("Write your Vivado project HEAD name: ").strip()
+        # vivado_name_project = input("Write your Vivado project HEAD name: ").strip()
+        vivado_name_project = "project_multicycle"  # Default project name
 
         import os
         home_dir = os.path.expanduser("~").replace("\\", "/")
-        vivado_path = f"{vivado_name_project}/{vivado_name_project}.srcs/sim_1/imports"
-        vivado_path = os.path.join(home_dir, vivado_path)
-        with_src = os.path.join(vivado_path, "src")
-        if os.path.exists(with_src):
-            vivado_path = os.path.join(vivado_path, "src")
+        vivado_path = f"{vivado_name_project}/{vivado_name_project}.srcs/sim_1/imports/src"
         complete_vivado_path = vivado_path + "/memfile.dat"
         
         get = os.path.exists(complete_vivado_path)
@@ -439,7 +436,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         with open(complete_vivado_path, "w") as f:
-            for instr in instrs:
-                f.write(f"{instr:08X}\n")
+            for i in range(len(instrs)):
+                f.write(f"{instrs[i]:08X} // {extract[i]}\n")
 
         print(f"\nSUCCESS: Hex memory written to {complete_vivado_path}")
