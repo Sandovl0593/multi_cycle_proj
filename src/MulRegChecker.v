@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 module MulRegChecker(
     input wire [31:0] Instr,
     input wire opMul,

@@ -120,7 +120,7 @@ module datapath (
     );
 
     // RA1, RA2 -> [ regfile ] -> RD1, RD2
-    regfile rfile(
+    regfile rf(
         .clk(clk),
         .we3(RegWrite),
         .we4(IsLongMul), //condicion para el SMULL, UMULL y escribir en el Ra

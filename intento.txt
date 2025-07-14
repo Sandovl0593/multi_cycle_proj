@@ -1,39 +1,3 @@
-module top (
-    input wire clk,
-    input wire reset,
-    output wire [3:0] anode,
-    output wire [7:0] catode
-);
-    wire [31:0] Result;
-    wire [31:0] WriteData;
-    wire [31:0] Adr;
-    wire MemWrite;
-    wire [31:0] PC;
-    wire [31:0] Instr;
-    wire [31:0] ReadData;
-    wire opMul; //para multiply
-    wire IsLongMul;         //new para Umul y Smul
-
-    // nuevos visualizadores
-    wire [31:0] SrcA;        // para ver SrcA
-    wire [31:0] SrcB;        // para ver SrcB
-    // utiles para el multiply:
-    wire [3:0] Rn;           // Para ver Rn
-    wire [3:0] Rm;           // Para ver Rm (DP) o Rd (Mem Inmediate)
-    wire [3:0] Rd;           // Para ver escritura
-    wire [3:0] Ra;           // Para ver Ra en el caso de SMULL; UMULL
-    wire [31:0] ALUResult;    // Para ver el resultado de la ALU
-    wire [31:0] ALUResult2;    // visualizar resultado mul 64:32
-    wire [3:0] state;
-    wire [3:0] ALUFlags;
-    wire RegWrite;
-    wire [3:0] ALUControl;      //se expandió a 4 bits
-    wire [31:0] ALUOut;
-
-    wire isRegWrite; // para el regfile
-    wire [31:0] rdisplay; // para el display
-    reg [15:0] displayData;      // display a value on visualizer
-
     arm arm(
         .clk(clk),
         .reset(reset),
@@ -64,16 +28,24 @@ module top (
         .ALUOut(ALUOut),
         .rdisplay(rdisplay)         // display a value on visualizer (basys3
     );
-        
-    mem mem(
-        .clk(clk),
-        .we(MemWrite),
-        .a(Adr),
-        .wd(WriteData),
-        .rd(ReadData)
+
+    // ----------
+    // blk_mem_gen_0   ES EL NOMBRE DEL BLOCK DESDE BLCOK MEMORY GENERATION
+    / -----------
+    // WIDTH = 32  ;  DEPTH = 64  ; WRITE ENABLE ACTIVED
+    // ----------
+    
+    blk_mem_gen_0 mem(
+        .clka(clk),
+        .ena(1'b1),
+        .wea(MemWrite),
+        .addra(Adr[31:2]),    // tu dirección word-aligned
+        .dina (WriteData),         // dato de escritura
+        .douta(ReadData)          // dato de lectura
     );
     
-    assign isRegWrite = RegWrite && (Rd == 4'b0011); // R3
+    // ------ ¿SERIA NECESARIO?
+    assign isRegWrite = RegWrite && (Rd == 4'd0); // R0
 
     always @(posedge clk or posedge reset) begin
         if (reset) displayData <= 16'd0; // reset display data

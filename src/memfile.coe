@@ -1,0 +1,8 @@
+; memory_initialization_radix = 16
+; memory_initialization_vector is a comma‑separated list of hex words
+memory_initialization_radix=16;
+memory_initialization_vector=
+E3A0100A,   
+E3A0200A,   
+E0000291,    
+EAFFFFFE;

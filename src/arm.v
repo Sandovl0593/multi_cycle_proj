@@ -108,5 +108,6 @@ module arm (
         .ALUOut(ALUOut)
     );
     
-    assign rdisplay = dp.rfile.rf[4'b0011];
+    // harcoded 
+    assign rdisplay = dp.rf.rf[4'd0];  // GET R0x
 endmodule
